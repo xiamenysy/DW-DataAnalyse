@@ -36,6 +36,24 @@ DECLARE
     CLOSE c_cursor;
 END;
 
+---Use string replacement internal function
+
+DECLARE
+    v_name EMPLOYEE_NAME_BIRTHDAY.NAME%TYPE;
+    CURSOR c_cursor IS SELECT NAME FROM EMPLOYEE_NAME_BIRTHDAY;
+    v_name_no_dash VARCHAR2(20 CHAR);
+  BEGIN
+    OPEN c_cursor;
+    LOOP
+    FETCH c_cursor INTO v_name;
+    EXIT WHEN c_cursor%NOTFOUND; 
+    v_name_no_dash := REPLACE(v_name, '-');
+    SYS.DBMS_OUTPUT.PUT_LINE(v_name);
+    UPDATE EMPLOYEE_NAME_BIRTHDAY SET BIRTHDAY = v_name_no_dash WHERE NAME = v_name;
+    END LOOP;
+    CLOSE c_cursor;
+END;
+
 ----------------------------------------String Usage-----------------------------------
 
 DECLARE
@@ -63,7 +81,7 @@ BEGIN
     comma_location := INSTR(names_adjusted,',',comma_location+1);
     EXIT
   WHEN comma_location = 0;
-    DBMS_OUTPUT.PUT_LINE( SUBSTR(names_adjusted,prev_location+1, comma_location-prev_location-1));
+    SYS.DBMS_OUTPUT.PUT_LINE( SUBSTR(names_adjusted,prev_location+1, comma_location-prev_location-1));
     prev_location := comma_location;
   END LOOP;
 END;
@@ -72,5 +90,28 @@ END;
 DECLARE
   names VARCHAR2(60) := 'Anna,Matt,Joe,Nathan,Andrew,Aaron,Jeff';
 BEGIN
-  DBMS_OUTPUT.PUT_LINE( REPLACE(names, ',', chr(10)) );
+  SYS.DBMS_OUTPUT.PUT_LINE( REPLACE(names, ',', chr(10)) );
+END;
+
+
+--String pedding
+DECLARE
+  a VARCHAR2(30) := 'Jeff';
+  b VARCHAR2(30) := 'Eric';
+  c VARCHAR2(30) := 'Andrew';
+  d VARCHAR2(30) := 'Aaron';
+  e VARCHAR2(30) := 'Matt';
+  f VARCHAR2(30) := 'Joe';
+BEGIN
+  SYS.DBMS_OUTPUT.PUT_LINE( RPAD(a,10) || LPAD(b,10));
+  SYS.DBMS_OUTPUT.PUT_LINE( RPAD(a,10,'.') || LPAD(b,10,'.') );
+END;
+
+---Trim
+DECLARE
+  a VARCHAR2(40) := 'This sentence has too many periods......';
+  b VARCHAR2(40) := 'The number 1';
+BEGIN
+  DBMS_OUTPUT.PUT_LINE( RTRIM(a,'.') );
+  DBMS_OUTPUT.PUT_LINE( LTRIM(b, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz') );
 END;
