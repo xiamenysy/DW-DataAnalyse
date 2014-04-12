@@ -159,11 +159,164 @@ select * from DWQ$LIBRARIAN.DWQ_SHIP_GBBB_BILLING_ALL where PROD_ID_NO = '1756-N
 
 
 
+------------------------------------pp--------------------------
+select * from DWQ$LIBRARIAN.INV_SAP_PP_DEPEND_DMD_FRCST where  PLWRK_PLANNINGPLANT = '5050';
+
+select * from DWQ$LIBRARIAN.INV_SAP_PP_MARM where MATERIALID ='1756-N2';
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------PO---------------------------------
+
+SELECT BANFN_PURCHREQNUMBER,
+MATERIALID,
+PLANTID,
+RESWK_SUPPLYISSNGPLNTINSTO,
+MENGE_PURCHREQQUANTITY,
+BADAT_REQREQUESTDATE,
+LPEIN_CATOFDELIVERYDATE,
+LFDAT_ITEMDELIVERYDATE,
+FRGDT_PURCHREQRELEASEDATE,
+WEBAZ_GRT,
+PEINH_PRICEUNIT,
+WEPOS_GOODSRECEIPTINDICATOR,
+REPOS_INVOICERECEIPTINDICATOR,
+LIFNR_DESIREDVENDOR,
+FLIEF_FIXEDVENDOR,
+EBELN_PONUMBER,
+EBELP_POITEMNUMBER,
+BEDAT_PODATE,
+EBAKZ_PURCHREQCLOSED,
+PLIFZ_PDT,
+BERID_MRPAREA,
+DW_DATE FROM DWQ$LIBRARIAN.INV_SAP_PO_EBAN WHERE PLANTID = '5050' AND MATERIALID = '140U-G-RMX B';
+
+SELECT MATERIALID,
+PLANTID,
+EBELNPURCHDOCNO,
+EBELPPURCHITEMNO,
+BELNRMATERIALDOC,
+BUZEIMATERIALDOCITEM,
+BWARTMOVEMENTTYPE,
+BUDATPOSTINGDATE,
+MENGEQTY,
+XBLNRREFERENCEDOCUMENTNUM,
+BLDAT,
+MATNRMATERIAL,
+WERKSPLANT,
+CUMDELIVERYQTY,
+LASTDELIVERYDATE,
+TOTALRECIEVEDYQTY,
+POITEMRECIEVEDCUM,
+DW_DATE,
+POITEMRECIEVEDCUM_CHGE,
+ENTRY_DATE,
+ENTRY_TIME
+FROM DWQ$LIBRARIAN.INV_SAP_PO_EKBE WHERE PLANTID = '5050' AND MATERIALID = '140U-G-RMX B';
+
+
+select * from DWQ$LIBRARIAN.INV_SAP_INVENTORY_BY_PLANT where PLANTID = '5050' and MATERIALID = '140U-G-RMX B';
+
+select * from DWQ$LIBRARIAN.INV_SAP_SALES_SAP where MATERIALID = '140U-G-RMX B' and PLANTID = '5050';
+
+
+
+select * from DWQ$LIBRARIAN.INV_SAP_PO_plaf;
+select * from DWQ$LIBRARIAN.INV_SAP_PO_eban;
+
+-----------------------------------------------------
+select * from DWQ$LIBRARIAN.INV_SAP_PP_STO1090DEMAND_V WHERE MATERIALID = 'PN-25226'   ORDER BY STATISTICALDATE DESC 
+
+
+
+
+-------------------------------------------------------------------------------
+
+
+-- Below use to test sales orders table in dataware house...
+-- Date: 4/12/2014
+-- People: Marlon Huang
+
+
+-------------------------------------------------------------------------------
+
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_52_PVT where PLANTID = '5050' and materialid = '800FP-F1PX10 A';
+
+-------------------------------------
+--DWQ$LIBRARIAN.INV_SAP_SALES_CROSS
+--Table Describtion
+    MATERIAL           ,
+    DEM_QTY            NUMBER ,
+    ORDERAMT           NUMBER ,
+    LINE_COUNT         NUMBER ,
+    ORDERLINE_COUNTED  NUMBER ,
+    ONTIMETO_CONFIRMED NUMBER ,
+    DEM_AMT            NUMBER ,
+    WEEK               NUMBER ,
+    WEEK_DATE          DATE ,
+    RANK_WEEK          NUMBER ,
+    MAX_WEEK_DAY       DATE ,
+    MATL_FIRST_USED    DATE ,
+    PLANT              NUMBER ,
+    OUTLIER_CURRECTED  NUMBER
+-------------------------------------
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_CROSS where MATERIAL = '800FP-F1PX10 A' and plant = '5050';
+
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_CROSS where MATERIAL = '1756-A10 B' and plant = '5050' and WEEK_DATE > '01-jan-14';
+
+
+-------------------------------------
+--DWQ$LIBRARIAN.INV_SAP_SALES_CROSS
+--Table Describtion
+    MATERIAL           VARCHAR2(4000 BYTE) ,
+    DEM_QTY            Monthly Demand from real orders
+    MAX_MONTH_DAY      DATE ,
+    RANK_MONTH         NUMBER ,
+    YYYYMM             VARCHAR2(6 BYTE) ,
+    MAX_MONTH_DATE     DATE ,
+    MATL_FIRST_USED    DATE ,
+    PLANTID            NUMBER 
+-------------------------------------
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_CROSS_MONTH where MATERIAL = '1756-A10 B' and PLANTID = '5050';
+
+
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_STAT2 where PLANT = '5050' and MATERIAL = '1756-A10 B';
+
+-- 4.1 Creation Date OK!
+-- look up 1 week before.
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_HST where SALESDOC = '6000863061';  
+
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_HST_CURR2 where SALESDOC = '6000863061'; 
+
+-- THE MOST VALUE TABLE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Select * from DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP where SALESDOC = '6501710017'; 
+
+------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------
+
+select * from DWQ$LIBRARIAN.INV_SAP_PURCH_SOURCE where materialid = '1756-A10 B' and plantid = '5050';
 
 
 

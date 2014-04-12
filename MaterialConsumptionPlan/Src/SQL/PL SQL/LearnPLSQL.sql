@@ -24,6 +24,13 @@ END;
 
 --Display Function or Procedures
 -- PARA IN DATATYPE use in (dis in VARCHAR2)~!!!
+--PARAmeter
+--Mode Description Parameter usage
+--IN Read-only The value of the actual parameter can be referenced inside the module, but the parameter cannot
+--be changed. If you do not specify the parameter mode, then it is considered an IN parameter.
+--OUT Write-only The module can assign a value to the parameter, but the parameter’s value cannot be referenced.
+--IN OUT Read/write The module can both reference (read) and modify (write) the parameter--
+
 CREATE OR REPLACE PROCEDURE display_total_sales(dis in VARCHAR2)
 is
 begin
@@ -192,6 +199,14 @@ END;
 
 
 ---------------------------------------Cursor Usage------------------------------------
+--Name Description
+--%FOUND Returns TRUE if the record was fetched successfully, FALSE otherwise
+--%NOTFOUND Returns TRUE if the record was not fetched successfully, FALSE otherwise
+--%ROWCOUNT Returns the number of records fetched from cursor at that point in time
+--%ISOPEN Returns TRUE if cursor is open, FALSE otherwise
+--%BULK_ROWCOUNT Returns the number of records modified by the FORALL statement for each collection element
+--%BULK_EXCEPTIONS Returns exception information for rows modified by the FORALL statement for each collection element
+
 DECLARE
     v_name EMPLOYEE_NAME_BIRTHDAY.NAME%TYPE;
     CURSOR c_cursor IS SELECT NAME FROM EMPLOYEE_NAME_BIRTHDAY;
