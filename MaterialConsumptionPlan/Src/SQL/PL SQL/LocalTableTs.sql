@@ -202,7 +202,7 @@ BEDAT_PODATE,
 EBAKZ_PURCHREQCLOSED,
 PLIFZ_PDT,
 BERID_MRPAREA,
-DW_DATE FROM DWQ$LIBRARIAN.INV_SAP_PO_EBAN WHERE PLANTID = '5050' AND MATERIALID = '140U-G-RMX B';
+DW_DATE FROM DWQ$LIBRARIAN.INV_SAP_PO_EBAN WHERE PLANTID = '5050' AND MATERIALID = '1756-N2 B' and EBELN_PONUMBER = '6301052528';
 
 SELECT MATERIALID,
 PLANTID,
@@ -225,24 +225,37 @@ DW_DATE,
 POITEMRECIEVEDCUM_CHGE,
 ENTRY_DATE,
 ENTRY_TIME
-FROM DWQ$LIBRARIAN.INV_SAP_PO_EKBE WHERE PLANTID = '5050' AND MATERIALID = '140U-G-RMX B';
+FROM DWQ$LIBRARIAN.INV_SAP_PO_EKBE WHERE PLANTID = '5050' AND MATERIALID = '1756-N2 B';
 
 
 select * from DWQ$LIBRARIAN.INV_SAP_INVENTORY_BY_PLANT where PLANTID = '5050' and MATERIALID = '140U-G-RMX B';
 
 select * from DWQ$LIBRARIAN.INV_SAP_SALES_SAP where MATERIALID = '140U-G-RMX B' and PLANTID = '5050';
 
+select * from DWQ$LIBRARIAN.inv_sap_po_ekpo where plantid = '5050';
+select * from DWQ$LIBRARIAN.inv_sap_po_ekko where plantid = '5050';
 
-
-select * from DWQ$LIBRARIAN.INV_SAP_PO_plaf;
+select * from DWQ$LIBRARIAN.INV_SAP_PO_plaf  WHERE PLWRK_PLANPLANTID = '5050' AND MATERIALID = '1756-N2 B';
 select * from DWQ$LIBRARIAN.INV_SAP_PO_eban;
 
 -----------------------------------------------------
 select * from DWQ$LIBRARIAN.INV_SAP_PP_STO1090DEMAND_V WHERE MATERIALID = 'PN-25226'   ORDER BY STATISTICALDATE DESC 
 
 
+select * from DWQ$LIBRARIAN.INV_SAP_PO_EKES WHERE EBELN_PURCHDOCNO = '6301288636';
 
 
+select * from DWQ$LIBRARIAN.INV_SAP_PO_EKKO WHERE EBELN_PURCHDOCNO = '6301288636';
+
+select * from DWQ$LIBRARIAN.INV_SAP_PO_EKPO WHERE PLANTID = '5050' AND MATERIALID = '1756-N2 B';
+
+select * from DWQ$LIBRARIAN.INV_SAP_PO_EKPV WHERE EBELNPURCHDOCNO = '6301288636';
+
+
+select * from DWQ$LIBRARIAN.INV_SAP_PO_PVT WHERE PLANTID = '5050' AND MATERIAL = '1756-N2 B';
+
+
+select * from DWQ$LIBRARIAN.INV_SAP_PO_STAT WHERE PLANTID = '5050' AND MATERIALID = '1756-N2 B';
 -------------------------------------------------------------------------------
 
 
@@ -317,6 +330,37 @@ Select * from DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP where SALESDOC = '65017
 -------------------------------------------------------------------------------------------------
 
 select * from DWQ$LIBRARIAN.INV_SAP_PURCH_SOURCE where materialid = '1756-A10 B' and plantid = '5050';
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------Inventory----------------------------------------------------
+SELECT * FROM DWQ$LIBRARIAN.INV_SAP_INVENTORY_BY_PLANT WHERE PLANTID = '5050';
+
+
+
+
+
+
+
+
+----------------------------------Usage---------------------------------------------------------
+SELECT * FROM DWQ$LIBRARIAN.INV_SAP_IO_INPUTS WHERE PLANTID = '5050' and MATERIALID ='1756-N2 B';
+
+
+
+
+
+
+
 
 
 
