@@ -704,61 +704,87 @@ AND PLANTID  IN ('5040', '5070', '5100', '5110',  '5140', '5200');
 
 
 ---JOIN TOGETHER
-SELECT 
-MATERIALID||''||PLANTID as ID,
-MATERIALID as Material,
-PLANTID as Plant,
-MATERIALID||''||PLANTID as Key,
-MAT_DESC as Material_Description,
-PROD_BU as BU,
-PROC_TYPE as Procurement_Type,
-MRP_CONTROLLER_DISPO as MRP_CONTROLLER_ID,
-MRP_CONTROLLER as MRP_CONTROLLER,
-MATL_TYPE_MTART as MATL_TYPE,
-MRP_TYPE as MRP_TYPE,
-STRATEGY_GRP as Stock_Strategy,
-UNIT_COST as Unit_Price,
-REORDER_PT as Reorder_Point,
-SAFETY_STK as Safety_stock_Qty,
-LOT_SIZE_DISLS as LOT_SIZE,
-LOT_MIN_BUY as Min_LOT_SIZE,
-LOT_ROUNDING_VALUE as Rounding_val,
-GRT	as GRT,
-PDT	 as PDT,
-IPT	as IPT,
-OH_QTY as	OH_QTY,
-OH_$$	as OH_$$,
-INV_MAX	as INV_MAX,
-CURR_PLAN_INV_QTY as Target_Inv
-FROM DWQ$LIBRARIAN.INV_SAP_PP_OPTIMIZATION
-WHERE STRATEGY_GRP = '40' AND MATL_TYPE_MTART IN ('ZFG','ZTG')
-AND PLANTID  IN ('5040', '5070', '5100', '5110',  '5140', '5200');
 
---avg
-SELECT
-    MATERIALID||''||PLANTID as ID,
-    MATERIALID                    AS MATERIALID,
-    PLANTID                       AS PLANTID,
-    SUM(PLNMG_PLANNEDQUANTITY)/13 AS PLANNED_QUANTITY
-  FROM DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED 
-  WHERE (FPP.PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
-  AND PLANTID IN ('5040', '5070', '5100', '5110', '5140', '5200') and MATERIALID IN
-    (SELECT material
+SELECT *
+FROM
+  (SELECT MATERIALID
+    ||'_'
+    ||PLANTID  AS ID,
+    MATERIALID AS Material,
+    PLANTID    AS Plant,
+    MATERIALID
+    ||''
+    ||PLANTID            AS KEY,
+    MAT_DESC             AS Material_Description,
+    PROD_BU              AS BU,
+    PROC_TYPE            AS Procurement_Type,
+    MRP_CONTROLLER_DISPO AS MRP_CONTROLLER_ID,
+    MRP_CONTROLLER       AS MRP_CONTROLLER,
+    MATL_TYPE_MTART      AS MATL_TYPE,
+    MRP_TYPE             AS MRP_TYPE,
+    STRATEGY_GRP         AS Stock_Strategy,
+    UNIT_COST            AS Unit_Price,
+    REORDER_PT           AS Reorder_Point,
+    SAFETY_STK           AS Safety_stock_Qty,
+    LOT_SIZE_DISLS       AS LOT_SIZE,
+    LOT_MIN_BUY          AS Min_LOT_SIZE,
+    LOT_ROUNDING_VALUE   AS Rounding_val,
+    GRT                  AS GRT,
+    PDT                  AS PDT,
+    IPT                  AS IPT,
+    OH_QTY               AS OH_QTY,
+    OH_$$                AS OH_$$,
+    INV_MAX              AS INV_MAX,
+    CURR_PLAN_INV_QTY    AS Target_Inv
+  FROM DWQ$LIBRARIAN.INV_SAP_PP_OPTIMIZATION
+  WHERE STRATEGY_GRP   = '40'
+  AND MATL_TYPE_MTART IN ('ZFG','ZTG')
+  AND PLANTID         IN ('5040', '5070', '5100', '5110', '5140', '5200')
+  )pp
+LEFT JOIN
+  (SELECT fc_avg.id         AS ID,
+    fc_avg.PLANNED_QUANTITY AS PLANNED_QUANTITY,
+    backlog.TOTAL_OPEN
+  FROM
+    (SELECT MATERIALID
+      ||'_'
+      ||PLANTID                     AS ID,
+      MATERIALID                    AS MATERIALID,
+      PLANTID                       AS PLANTID,
+      SUM(PLNMG_PLANNEDQUANTITY)/13 AS PLANNED_QUANTITY
+    FROM DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED
+    WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
+    AND PLANTID                                                                     IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND MATERIALID                                                                  IN
+      (SELECT material
+      FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
+      WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200')
+      )
+    GROUP BY MATERIALID,
+      MATERIALID
+      ||'_'
+      ||PLANTID,
+      PLANTID
+    )fc_avg
+  LEFT JOIN
+    (SELECT Material
+      ||'_'
+      ||PLANT AS ID,
+      Material,
+      plant,
+      SUM(OPEN_QTY) AS TOTAL_OPEN
     FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
-    WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200')
-    ) group by MATERIALID, MATERIALID||''||PLANTID, PLANTID;
-
---backlog sum
-SELECT MATERIALID
-  ||''
-  ||PLANTID AS ID,
-  Material,
-  plant,
-  SUM(OPEN_QTY) AS TOTAL_OPEN
-FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
-WHERE MATERIAL IN
-  (SELECT material
-  FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
-  WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200')
-  )
-GROUP BY material, MATERIALID, plant;
+    WHERE plant  IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND MATERIAL IN
+      (SELECT material
+      FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
+      WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200')
+      )
+    GROUP BY Material
+      ||'_'
+      ||PLANT,
+      Material,
+      plant
+    )backlog
+  ON fc_avg.ID                 = backlog.ID
+  )fc_avg_sum ON fc_avg_sum.ID = PP.ID ;
