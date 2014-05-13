@@ -788,3 +788,181 @@ LEFT JOIN
     )backlog
   ON fc_avg.ID                 = backlog.ID
   )fc_avg_sum ON fc_avg_sum.ID = PP.ID ;
+
+-------------------------------------------------------------------------------
+
+
+
+
+
+
+
+CREATE TABLE INV_SAP_PP_FRCST_PBIM_PBED AS
+SELECT * FROM DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED@ROCKWELL_DBLINK;
+
+CREATE TABLE INV_SAP_SALES_VBAK_VBAP_VBUP AS
+SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200');
+
+CREATE TABLE INV_SAP_PP_test_data AS
+SELECT MATERIALID
+    ||'_'
+    ||PLANTID  AS ID,
+    MATERIALID AS Material,
+    PLANTID    AS Plant,
+    MATERIALID
+    ||''
+    ||PLANTID               AS KEY,
+    MAT_DESC                AS Material_Description,
+    PROD_BU                 AS BU,
+    PROC_TYPE               AS Procurement_Type,
+    MRP_CONTROLLER_DISPO    AS MRP_CONTROLLER_ID,
+    MRP_CONTROLLER          AS MRP_CONTROLLER,
+    MATL_TYPE_MTART         AS MATL_TYPE,
+    MRP_TYPE                AS MRP_TYPE,
+    STRATEGY_GRP            AS Stock_Strategy,
+    UNIT_COST               AS Unit_Price,
+    REORDER_PT              AS Reorder_Point,
+    SAFETY_STK              AS Safety_stock_Qty,
+    LOT_SIZE_DISLS          AS LOT_SIZE,
+    LOT_MIN_BUY             AS Min_LOT_SIZE,
+    LOT_ROUNDING_VALUE      AS Rounding_val,
+    GRT                     AS GRT,
+    PDT                     AS PDT,
+    IPT                     AS IPT,
+    OH_QTY                  AS OH_QTY,
+    OH_$$                   AS OH_$$
+  FROM DWQ$LIBRARIAN.INV_SAP_PP_OPTIMIZATION@ROCKWELL_DBLINK
+  WHERE STRATEGY_GRP   = '40'
+  AND MATL_TYPE_MTART IN ('ZFG','ZTG')
+  AND PLANTID         IN ('5040', '5070', '5100', '5110', '5140', '5200');
+-------------------------------------------------------------------------------
+  
+SELECT * FROM STOCK_ITEM_PERFORMANCE;
+
+--Fecth back to local
+CREATE TABLE STOCK_ITEM_PERFORMANCE AS
+SELECT PP.ID              AS ID,
+  PP.Material             AS Material,
+  PP.Plant                AS Plant,
+  PP.KEY                  AS KEY,
+  PP.Material_Description AS Material_Description,
+  PP.BU                   AS BU,
+  PP.Procurement_Type     AS Procurement_Type,
+  PP.MRP_CONTROLLER_ID    AS MRP_CONTROLLER_ID,
+  PP.MRP_CONTROLLER       AS MRP_CONTROLLER,
+  PP.MATL_TYPE            AS MATL_TYPE,
+  PP.MRP_TYPE             AS MRP_TYPE,
+  PP.Stock_Strategy       AS Stock_Strategy,
+  PP.Unit_Price           AS Unit_Price,
+  PP.Reorder_Point        AS Reorder_Point,
+  PP.Safety_stock_Qty     AS Safety_stock_Qty,
+  PP.LOT_SIZE             AS LOT_SIZE,
+  PP.Min_LOT_SIZE         AS Min_LOT_SIZE,
+  PP.Rounding_val         AS Rounding_val,
+  PP.GRT                  AS GRT,
+  PP.PDT                  AS PDT,
+  PP.IPT                  AS IPT,
+  PP.OH_QTY               AS OH_QTY,
+  PP.OH_$$                AS OH_$$,
+  FC_AVG_SUM.PLANNED_QUANTITY AS FC_AVG_WEEKLY,
+  FC_AVG_SUM.TOTAL_OPEN      AS BACKLOG_SUM
+FROM
+  (SELECT MATERIALID
+    ||'_'
+    ||PLANTID  AS ID,
+    MATERIALID AS Material,
+    PLANTID    AS Plant,
+    MATERIALID
+    ||''
+    ||PLANTID               AS KEY,
+    MAT_DESC                AS Material_Description,
+    PROD_BU                 AS BU,
+    PROC_TYPE               AS Procurement_Type,
+    MRP_CONTROLLER_DISPO    AS MRP_CONTROLLER_ID,
+    MRP_CONTROLLER          AS MRP_CONTROLLER,
+    MATL_TYPE_MTART         AS MATL_TYPE,
+    MRP_TYPE                AS MRP_TYPE,
+    STRATEGY_GRP            AS Stock_Strategy,
+    UNIT_COST               AS Unit_Price,
+    REORDER_PT              AS Reorder_Point,
+    SAFETY_STK              AS Safety_stock_Qty,
+    LOT_SIZE_DISLS          AS LOT_SIZE,
+    LOT_MIN_BUY             AS Min_LOT_SIZE,
+    LOT_ROUNDING_VALUE      AS Rounding_val,
+    GRT                     AS GRT,
+    PDT                     AS PDT,
+    IPT                     AS IPT,
+    OH_QTY                  AS OH_QTY,
+    OH_$$                   AS OH_$$
+  FROM DWQ$LIBRARIAN.INV_SAP_PP_OPTIMIZATION@ROCKWELL_DBLINK
+  WHERE STRATEGY_GRP   = '40'
+  AND MATL_TYPE_MTART IN ('ZFG','ZTG')
+  AND PLANTID         IN ('5040', '5070', '5100', '5110', '5140', '5200')
+  )PP
+LEFT JOIN
+  (SELECT FC_AVG.id         AS ID,
+    FC_AVG.PLANNED_QUANTITY AS PLANNED_QUANTITY,
+    BACKLOG.TOTAL_OPEN AS TOTAL_OPEN
+  FROM
+    (SELECT MATERIALID
+      ||'_'
+      ||PLANTID                     AS ID,
+      MATERIALID                    AS MATERIALID,
+      PLANTID                       AS PLANTID,
+      SUM(PLNMG_PLANNEDQUANTITY)/26 AS PLANNED_QUANTITY
+    FROM DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED@ROCKWELL_DBLINK
+    WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
+    AND PLANTID                                                                     IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND MATERIALID                                                                  IN
+      (SELECT material
+      FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
+      WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200')
+      )
+    GROUP BY MATERIALID,
+      MATERIALID
+      ||'_'
+      ||PLANTID,
+      PLANTID
+    )FC_AVG
+  LEFT JOIN
+    (SELECT Material
+      ||'_'
+      ||PLANT AS ID,
+      Material,
+      plant,
+      SUM(OPEN_QTY) AS TOTAL_OPEN
+    FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
+    WHERE plant  IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND MATERIAL IN
+      (SELECT material
+      FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
+      WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200')
+      )
+    GROUP BY Material
+      ||'_'
+      ||PLANT,
+      Material,
+      plant
+    )BACKLOG
+  ON FC_AVG.ID                 = BACKLOG.ID
+  )FC_AVG_SUM ON FC_AVG_SUM.ID = PP.ID ;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
