@@ -399,6 +399,7 @@ SELECT MATERIALID,
 FROM DWQ$LIBRARIAN.inv_sap_pp_optimization
 WHERE Plantid = '5040';
 
+CREATE TABLE inv_sap_pp_optimization_5041
 Select * from DWQ$LIBRARIAN.inv_sap_pp_optimization;
 
 
@@ -751,10 +752,11 @@ LEFT JOIN
       ||PLANTID                     AS ID,
       MATERIALID                    AS MATERIALID,
       PLANTID                       AS PLANTID,
-      SUM(PLNMG_PLANNEDQUANTITY)/13 AS PLANNED_QUANTITY
+      ROUND(SUM(PLNMG_PLANNEDQUANTITY)/26 + 1,0) AS PLANNED_QUANTITY
     FROM DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED
     WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
     AND PLANTID                                                                     IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND VERSBP_VERSION = '55'
     AND MATERIALID                                                                  IN
       (SELECT material
       FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
@@ -840,6 +842,7 @@ SELECT MATERIALID
 SELECT * FROM STOCK_ITEM_PERFORMANCE;
 
 --Fecth back to local
+DROP TABLE STOCK_ITEM_PERFORMANCE;
 CREATE TABLE STOCK_ITEM_PERFORMANCE AS
 SELECT PP.ID              AS ID,
   PP.Material             AS Material,
@@ -865,7 +868,8 @@ SELECT PP.ID              AS ID,
   PP.OH_QTY               AS OH_QTY,
   PP.OH_$$                AS OH_$$,
   FC_AVG_SUM.PLANNED_QUANTITY AS FC_AVG_WEEKLY,
-  FC_AVG_SUM.TOTAL_OPEN      AS BACKLOG_SUM
+  FC_AVG_SUM.TOTAL_OPEN      AS BACKLOG_SUM,
+  FC_AVG_SUM.TOTAL_PASSDUE AS PASSDUE_SUM
 FROM
   (SELECT MATERIALID
     ||'_'
@@ -900,19 +904,21 @@ FROM
   AND PLANTID         IN ('5040', '5070', '5100', '5110', '5140', '5200')
   )PP
 LEFT JOIN
-  (SELECT FC_AVG.id         AS ID,
+  (SELECT FC_AVG.ID         AS ID,
     FC_AVG.PLANNED_QUANTITY AS PLANNED_QUANTITY,
-    BACKLOG.TOTAL_OPEN AS TOTAL_OPEN
+    BACKLOG.TOTAL_OPEN AS TOTAL_OPEN,
+    BACKLOG.TOTAL_PASSDUE AS TOTAL_PASSDUE
   FROM
     (SELECT MATERIALID
       ||'_'
       ||PLANTID                     AS ID,
       MATERIALID                    AS MATERIALID,
       PLANTID                       AS PLANTID,
-      SUM(PLNMG_PLANNEDQUANTITY)/26 AS PLANNED_QUANTITY
+      ROUND(SUM(PLNMG_PLANNEDQUANTITY)/26 + 1, 0) AS PLANNED_QUANTITY
     FROM DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED@ROCKWELL_DBLINK
     WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
     AND PLANTID                                                                     IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND VERSBP_VERSION = '55'
     AND MATERIALID                                                                  IN
       (SELECT material
       FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
@@ -925,14 +931,19 @@ LEFT JOIN
       PLANTID
     )FC_AVG
   LEFT JOIN
+    (
+    SELECT TOTAL_OPEN.ID AS ID,
+    TOTAL_OPEN.TOTAL_OPEN AS TOTAL_OPEN,
+    total_passdue.passdue as TOTAL_PASSDUE
+    FROM
     (SELECT Material
       ||'_'
       ||PLANT AS ID,
       Material,
-      plant,
+      PLANT,
       SUM(OPEN_QTY) AS TOTAL_OPEN
     FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
-    WHERE plant  IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    WHERE PLANT  IN ('5040', '5070', '5100', '5110', '5140', '5200')
     AND MATERIAL IN
       (SELECT material
       FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
@@ -942,27 +953,29 @@ LEFT JOIN
       ||'_'
       ||PLANT,
       Material,
-      plant
+      plant)TOTAL_OPEN 
+      left join
+      (SELECT Material
+      ||'_'
+      ||PLANT AS ID,
+      Material,
+      PLANT,
+      SUM(OPEN_QTY) AS passdue
+    FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
+    WHERE PLANT  IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND MATERIAL IN
+      (SELECT material
+      FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
+      WHERE plant IN ('5040', '5070', '5100', '5110', '5140', '5200')
+      )
+    AND MAX_COMMIT_DATE < SYSDATE - 1
+    GROUP BY Material
+      ||'_'
+      ||PLANT,
+      Material,
+      plant)total_passdue 
+      ON total_passdue.ID = TOTAL_OPEN.ID
     )BACKLOG
   ON FC_AVG.ID                 = BACKLOG.ID
   )FC_AVG_SUM ON FC_AVG_SUM.ID = PP.ID ;
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
