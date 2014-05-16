@@ -1,0 +1,131 @@
+Private Sub CommandButton1_Click()
+Sheets("Report").Range("1:65536").Clear
+    
+End Sub
+
+Private Sub Create_New_File_Click()
+    'Generate new independent file
+    Dim NewReport As Workbook
+    Dim NewFileName As String
+    
+    Application.ScreenUpdating = False
+    Debug.Print Workbooks("BDToolsForMe.xlsb").Sheets("Main").UsedRange.Rows.Count
+    Debug.Print Workbooks("BDToolsForMe.xlsb").Sheets("Temp").UsedRange.Rows.Count
+    Debug.Print Workbooks("BDToolsForMe.xlsb").Sheets("Setup").UsedRange.Rows.Count
+    Debug.Print Workbooks("BDToolsForMe.xlsb").Sheets("Report").UsedRange.Rows.Count
+    
+    'Active Wordbook And Sheets
+    Set NewReport = Workbooks.Add
+        With NewReport
+                .Title = "Create_New_Report"
+                .Subject = "NewReport"
+                .SaveAs FileName:=Application.GetSaveAsFilename("NewReport.xlsx")
+                NewFileName = NewReport.Name
+        End With
+
+    For i = 1 To Workbooks("BDToolsForMe.xlsb").Sheets("Report").UsedRange.Rows.Count
+        Workbooks("BDToolsForMe.xlsb").Sheets("Report").Rows(i).Copy Workbooks(NewFileName).Sheets("Sheet1").Rows(i)
+    Next
+    Application.ScreenUpdating = True
+    
+End Sub
+
+Private Sub RunReport_Click()
+    'SQL Input Data Process Declaration
+    Dim OraOpen As Boolean
+    Dim conn As Object
+    Dim rst_query_report As Object
+    Dim sql_query As String
+    Dim result_number As Integer
+    Dim title_fields As Variant
+    Dim sql_update As String
+    Dim sql_drop As String
+    Dim sql_create As String
+    
+     title_fields = Array("Lead_Time", "OH$$", "MAX_INV", "TARGET_INV", "Present_Week_Status")
+          
+    'Set query material
+    sql_query = Temp.Cells(2, 1)
+    sql_drop = Temp.Cells(2, 3)
+    sql_create = Temp.Cells(2, 2)
+    
+   'Clear the report data
+    Sheets("Report").Range("1:65536").Clear
+    'Debug.Print sql_query
+     'Set Connection and recordset
+    Set conn = CreateObject("ADODB.Connection")
+    Set rst_query_report = CreateObject("ADODB.Recordset")
+    
+    'Open Database
+    conn.Open "Provider = msdaora; Data Source = orcl ; User Id = system; Password = 861117;"
+    OraOpen = True
+    conn.CursorLocation = 3
+    
+    On Error GoTo Err
+    conn.Execute (sql_drop)
+    Debug.Print sql_drop
+Err:
+   conn.Execute (sql_create)
+    
+    'Obtain recordset
+    Set rst_query_report = conn.Execute(sql_query)
+    
+    'Put data to Temp sheet
+    If rst_query_report.RecordCount > 0 Then
+        'Read Fields to Excel
+        For i = 1 To rst_query_report.Fields.Count
+            Report.Cells(1, i) = rst_query_report.Fields(i - 1).Name
+        Next i
+        'Read Data to Excel
+        Report.Range("A2").CopyFromRecordset rst_query_report
+    End If
+    
+    ' Database need to Close and set null
+    rst_query_report.Close
+    conn.Close
+    Set rst_query_report = Nothing
+    Set conn = Nothing
+    
+    'Generate Report
+    'Add Field Name and set up Field Color, Font style
+    For i = 0 To UBound(title_fields)
+        Report.Cells(1, i + 25) = title_fields(i)
+        Report.Cells(1, i + 25).Interior.ColorIndex = 34
+        Report.Cells(1, i + 25).Font.Size = 12
+        Report.Cells(1, i + 25).Font.FontStyle = "Bold"
+        Report.Cells(1, i + 25).WrapText = True
+    Next i
+    
+    'Add Formula
+    Report.Cells(2, 25).Formula = "=S2+R2+1"
+    Report.Cells(2, 26).Formula = "=U2*L2"
+    Report.Cells(2, 27).Formula = "=1.08*N2 + MAX(Q2, P2, Y2*(V2/7))"
+    Report.Cells(2, 28).Formula = "=1.08*N2 + 0.5*MAX(Q2,P2, V2)"
+    Report.Cells(2, 29).Formula = "= IF(J2 =""ND"",7,IF(OR(K2=""Z4"",K2=""Z0""),6,IF(U2<X2,1,IF(U2-W2<N2,2,IF(U2-W2 < AB2,3,IF(U2 -W2 <= AA2,4,5))))))"
+    
+    'Debug.Print Sheets("Report").UsedRange.Rows.Count
+    result_number = Sheets("Report").UsedRange.Rows.Count
+    Report.Activate
+    Report.Range("Y2:AC2").Select
+    Selection.AutoFill Destination:=Report.Range("Y2:AC" & result_number)
+    Report.Range("Y2:AC" & result_number).Select
+    
+    'Upload data to table
+    'Set Connection and recordset
+    Set conn = CreateObject("ADODB.Connection")
+    
+    'Open Database
+    conn.Open "Provider = msdaora; Data Source = orcl ; User Id = system; Password = 861117;"
+    OraOpen = True
+    conn.CursorLocation = 3
+    
+    For i = 1 To result_number
+    sql_update = "UPDATE STOCK_ITEM_PERFORMANCE SET STOCK_ITEM_PERFORMANCE.LEAD_TIME ='" & Report.Cells(i + 1, 25) & "',STOCK_ITEM_PERFORMANCE.OH$$ ='" & Report.Cells(i + 1, 26) & "',STOCK_ITEM_PERFORMANCE.MAX_INV ='" & Report.Cells(i + 1, 27) & "',STOCK_ITEM_PERFORMANCE.TARGET_INV ='" & Report.Cells(i + 1, 28) & "',STOCK_ITEM_PERFORMANCE.Present_Week_Status ='" & Report.Cells(i + 1, 29) & "' WHERE STOCK_ITEM_PERFORMANCE.ID  = '" & Report.Cells(i + 1, 1) & "'" & ""
+    Debug.Print sql_update
+    conn.Execute (sql_update)
+    Next i
+    
+    conn.Close
+    Set conn = Nothing
+    
+End Sub
