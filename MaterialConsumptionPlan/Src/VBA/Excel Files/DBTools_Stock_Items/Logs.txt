@@ -1,0 +1,9 @@
+DBTools_Stock_Item Project Logs
+--05.19.2014
+Create a MileStone version. Basic on this version, we can do some optimize
+works.
+
+--05.20.2014
+1. Add items tracking tab from history data.
+2. Add color to columns
+
