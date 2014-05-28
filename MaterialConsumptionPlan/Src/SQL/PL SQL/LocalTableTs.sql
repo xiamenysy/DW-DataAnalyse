@@ -321,7 +321,7 @@ SELECT * FROM DWQ$LIBRARIAN.INV_SAP_PRODUCTION_PARAMETERS WHERE MATERIALID = '17
 
 -------------------------------------------------------------------------------------------------
 
-select * from DWQ$LIBRARIAN.INV_SAP_PURCH_SOURCE where materialid = '1756-A10 B' and plantid = '5050';
+select * from INV_SAP_CROSS_part where materialid = '1756-A10 B';
 
 
 
@@ -980,4 +980,7 @@ LEFT JOIN
     )BACKLOG
   ON FC_AVG.ID                 = BACKLOG.ID
   )FC_AVG_SUM ON FC_AVG_SUM.ID = PP.ID ;
+  
+-----------------------------Transit Date Table---------------------------
+SELECT * FROM DWQ$LIBRARIAN.INV_SAP_PLANT_TRANSIT_DAYS_V WHERE RECEIVING_PLANT = '5040' and Supply_Plantid = '1090';
   
