@@ -14,8 +14,6 @@
 --26 weeks Usage Lines Count
 --Use line count to show the frequency that the customer order it. The qty do not reveal this. 
 
-
-
 --------------------------------------26 weeks Usage Lines Count----------------------------
 SELECT MATERIALID, PLANTID, (SUM(PLANTID)/PLANTID) AS LINE_COUNT
 FROM DWQ$LIBRARIAN.INV_SAP_SALES_HST@ROCKWELL_DBLINK
