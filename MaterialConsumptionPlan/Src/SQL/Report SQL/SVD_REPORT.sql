@@ -170,6 +170,182 @@ LEFT JOIN
   )FC_AVG_WEEK
 ON FC_AVG_WEEK.ID = SVD_REPORT.ID;
 
+---Local Version
+DROP VIEW VIEW_SVD_REPORT;
+SELECT count(*) FROM VIEW_SVD_REPORT;
+CREATE VIEW VIEW_SVD_REPORT AS
+SELECT SVD_REPORT.ID                  AS ID,
+  SVD_REPORT.MATERIAL                 AS MATERIAL,
+  SVD_REPORT.PLANT                    AS PLANT,
+  SVD_REPORT.STRATEGY_GRP             AS STRATEGY_GRP,
+  SVD_REPORT.SBU                      AS SBU,
+  SVD_REPORT.SAFETY_STK               AS SAFETY_STK,
+  FC_AVG_WEEK.FC_AVG26_WEEK           AS FC_AVG26_WEEK_QTY,
+  SVD_REPORT.OH_QTY                   AS OH_QTY,
+  SVD_REPORT.STOCK_IN_TRANSIT_QTY     AS STOCK_IN_TRANSIT_QTY,
+  SVD_REPORT.BACKLOG_OPEN             AS BACKLOG_OPEN,
+  SVD_REPORT.DUE_OPEN_QTY_THREE_WEEKS AS DUE_OPEN_QTY_THREE_WEEKS,
+  SVD_REPORT.PAST_DUE_OPEN            AS PAST_DUE_OPEN
+FROM
+  (SELECT SVD_REPORT_ADD.ID                 AS ID,
+    SVD_REPORT_ADD.MATERIAL                 AS MATERIAL,
+    SVD_REPORT_ADD.PLANT                    AS PLANT,
+    SVD_REPORT_ADD.STRATEGY_GRP             AS STRATEGY_GRP,
+    SVD_REPORT_ADD.SBU                      AS SBU,
+    SVD_REPORT_ADD.SAFETY_STK               AS SAFETY_STK,
+    SVD_REPORT_ADD.OH_QTY                   AS OH_QTY,
+    SVD_REPORT_ADD.BACKLOG_OPEN             AS BACKLOG_OPEN,
+    SVD_REPORT_ADD.PAST_DUE_OPEN            AS PAST_DUE_OPEN,
+    SVD_REPORT_ADD.DUE_OPEN_QTY_THREE_WEEKS AS DUE_OPEN_QTY_THREE_WEEKS,
+    SVD_REPORT_ADD.STOCK_IN_TRANSIT_QTY     AS STOCK_IN_TRANSIT_QTY
+  FROM
+    (SELECT DISTINCT MATERIAL
+      ||'_'
+      ||PLANT AS ID
+    FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+    WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+    )OPEN_ORDER_MATERIAL
+  LEFT JOIN
+    (SELECT SVD_BASISC_INFO.ID                 AS ID,
+      SVD_BASISC_INFO.MATERIAL                 AS MATERIAL,
+      (SVD_BASISC_INFO.PLANT - 1)              AS PLANT,
+      SVD_BASISC_INFO.STRATEGY_GRP             AS STRATEGY_GRP,
+      SUBSTR(SVD_BASISC_INFO.SBU,0,3)          AS SBU,
+      SVD_BASISC_INFO.SAFETY_STK               AS SAFETY_STK,
+      SVD_BASISC_INFO.OH_QTY                   AS OH_QTY,
+      SVD_BASISC_INFO.BACKLOG_OPEN             AS BACKLOG_OPEN,
+      SVD_BASISC_INFO.PAST_DUE_OPEN            AS PAST_DUE_OPEN,
+      SVD_BASISC_INFO.DUE_OPEN_QTY_THREE_WEEKS AS DUE_OPEN_QTY_THREE_WEEKS,
+      STOCK_IN_TRAINST.STOCK_IN_TRANSIT_QTY    AS STOCK_IN_TRANSIT_QTY
+    FROM
+      (SELECT PP_INFO.ID                                   AS ID,
+        PP_INFO.MATERIALID                                 AS MATERIAL,
+        PP_INFO.PLANTID                                    AS PLANT,
+        PP_INFO.STRATEGY_GRP                               AS STRATEGY_GRP,
+        PP_INFO.PROD_BU                                    AS SBU,
+        PP_INFO.SAFETY_STK                                 AS SAFETY_STK,
+        PP_INFO.OH_QTY                                     AS OH_QTY,
+        BACKLOG_PASTDUE_DUE_THREE.BACKLOG_OPEN             AS BACKLOG_OPEN,
+        BACKLOG_PASTDUE_DUE_THREE.PAST_DUE_OPEN            AS PAST_DUE_OPEN,
+        BACKLOG_PASTDUE_DUE_THREE.DUE_OPEN_QTY_THREE_WEEKS AS DUE_OPEN_QTY_THREE_WEEKS
+      FROM
+        (SELECT MATERIALID
+          ||'_'
+          ||(PLANTID - 1) AS ID,
+          MATERIALID,
+          PLANTID,
+          STRATEGY_GRP,
+          PROD_BU,
+          SAFETY_STK,
+          OH_QTY
+        FROM INV_SAP_PP_OPTIMIZATION
+        WHERE STRATEGY_GRP  IN ('SG', '40', 'Z4')
+        AND MATL_TYPE_MTART IN ('ZFG','ZTG')
+        AND PLANTID         IN ('5041', '5051', '5101', '5111', '5121', '5161', '5191', '5201','5071','5141')
+        )PP_INFO
+      LEFT JOIN
+        (SELECT BACKLOG_PASTDUE.ID                    AS ID,
+          BACKLOG_PASTDUE.BACKLOG_OPEN                AS BACKLOG_OPEN,
+          BACKLOG_PASTDUE.PAST_DUE_OPEN               AS PAST_DUE_OPEN,
+          DUE_IN_THREE_WEEKS.DUE_OPEN_QTY_THREE_WEEKS AS DUE_OPEN_QTY_THREE_WEEKS
+        FROM
+          (SELECT BACKLOG_OPEN.ID           AS ID,
+            BACKLOG_OPEN.OPEN_QTY           AS BACKLOG_OPEN,
+            PAST_DUE_OPEN.PAST_DUE_OPEN_QTY AS PAST_DUE_OPEN
+          FROM
+            (SELECT MATERIAL
+              ||'_'
+              ||PLANT       AS ID,
+              MATERIAL      AS MATERIALID,
+              PLANT         AS PLANTID,
+              SUM(OPEN_QTY) AS OPEN_QTY
+            FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+            WHERE PLANT                  IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+            AND MAX_COMMIT_DATE < SYSDATE + 91
+            GROUP BY MATERIAL
+              ||'_'
+              ||PLANT,
+              MATERIAL,
+              PLANT
+            )BACKLOG_OPEN
+          LEFT JOIN
+            (SELECT MATERIAL
+              ||'_'
+              ||PLANT       AS ID,
+              MATERIAL      AS MATERIALID,
+              PLANT         AS PLANTID,
+              SUM(OPEN_QTY) AS PAST_DUE_OPEN_QTY
+            FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+            WHERE PLANT                  IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+            AND MAX_COMMIT_DATE < SYSDATE - 1
+            GROUP BY MATERIAL
+              ||'_'
+              ||PLANT,
+              MATERIAL,
+              PLANT
+            )PAST_DUE_OPEN
+          ON PAST_DUE_OPEN.ID = BACKLOG_OPEN.ID
+          )BACKLOG_PASTDUE
+        LEFT JOIN
+          (SELECT MATERIAL
+            ||'_'
+            ||PLANT       AS ID,
+            MATERIAL      AS MATERIALID,
+            PLANT         AS PLANTID,
+            SUM(OPEN_QTY) AS DUE_OPEN_QTY_THREE_WEEKS
+          FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+          WHERE PLANT                                                      IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+          AND (MAX_COMMIT_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 21))
+          GROUP BY MATERIAL
+            ||'_'
+            ||PLANT,
+            MATERIAL,
+            PLANT
+          )DUE_IN_THREE_WEEKS
+        ON DUE_IN_THREE_WEEKS.ID                                   = BACKLOG_PASTDUE.ID
+        )BACKLOG_PASTDUE_DUE_THREE ON BACKLOG_PASTDUE_DUE_THREE.ID = PP_INFO.ID
+      )SVD_BASISC_INFO
+    LEFT JOIN
+      (SELECT MATERIALID
+        ||'_'
+        ||PLANTID AS ID,
+        MATERIALID,
+        PLANTID,
+        SUM(DELIVERY_QTY_SUOM) AS STOCK_IN_TRANSIT_QTY
+      FROM INV_SAP_LIKP_LIPS_DAILY
+      WHERE REFERENCE_DOC_TRIM IN
+        (SELECT EBELNPURCHDOCNO
+        FROM INV_SAP_PP_PO_HISTORY
+        WHERE PLANTID        IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+        AND DELIVERYCOMPLETE IS NULL
+        )
+      AND CHANGED_ON_DATE IS NULL
+      GROUP BY MATERIALID,
+        MATERIALID,
+        PLANTID
+      )STOCK_IN_TRAINST
+    ON STOCK_IN_TRAINST.ID               = SVD_BASISC_INFO.ID
+    )SVD_REPORT_ADD ON SVD_REPORT_ADD.ID = OPEN_ORDER_MATERIAL.ID
+  )SVD_REPORT
+LEFT JOIN
+  (SELECT MATERIALID
+    ||'_'
+    ||PLANTID                           AS ID,
+    MATERIALID                          AS MATERIALID,
+    PLANTID                             AS PLANTID,
+    CEIL(SUM(PLNMG_PLANNEDQUANTITY)/26) AS FC_AVG26_WEEK
+  FROM INV_SAP_PP_FRCST_PBIM_PBED
+  WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
+  AND PLANTID                                                                        IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+  AND VERSBP_VERSION = '55'
+  GROUP BY MATERIALID,
+    MATERIALID
+    ||'_'
+    ||PLANTID,
+    PLANTID,
+    MATERIALID
+  )FC_AVG_WEEK
+ON FC_AVG_WEEK.ID = SVD_REPORT.ID;
 
 
 --Add Sales Orders detail review
@@ -927,3 +1103,13 @@ LEFT JOIN
     )ITEM_BK ON ITEM_BK.ID = SOLD_PT.ID
   )PT_BK ON PT_BK.ID       = SALES_PP.ID
   )WHERE (COMMITTED_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 14)) AND PLANT                  IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
+
+----SALES ORDER
+CREATE VIEW VIEW_INV_SVD_OPEN_SO AS
+SELECT * FROM VIEW_INV_SAP_OPEN_SO ;
+CREATE VIEW VIEW_INV_SVD_BACKLOG AS
+SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE COMMITTED_DATE < SYSDATE + 91 AND MATERIAL = '100-C09EJ10 A';
+CREATE VIEW VIEW_INV_SVD_PASS_DUE AS
+SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE COMMITTED_DATE < SYSDATE - 1;
+CREATE VIEW VIEW_INV_SVD_THREE_WEEKS AS
+SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE COMMITTED_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 21);

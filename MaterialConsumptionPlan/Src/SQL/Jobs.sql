@@ -632,7 +632,8 @@ FROM INV_SAP_SALES_VBAK_VBAP_VBUP;
 --VIEW_INV_SAP_BACKLOG_SO
 --WILL ADD PP INFORMATION IN IT
 CREATE VIEW VIEW_INV_SAP_BACKLOG_SO AS 
-SELECT OPEN_SO_BASIC.ID,
+SELECT  OPEN_SO_BASIC.ID,
+  OPEN_SO_BASIC.SO_ID,
   OPEN_SO_BASIC.SALES_DOC,
   OPEN_SO_BASIC.LINE_NUM,
   OPEN_SO_BASIC.MATERIAL,
@@ -674,6 +675,7 @@ SELECT OPEN_SO_BASIC.ID,
   OPEN_SO_BASIC.EXCHANGE_RATE_TO_USD
 FROM
   (SELECT ID,
+    SO_ID,
     SALES_DOC,
     LINE_NUM,
     MATERIAL,
@@ -720,6 +722,130 @@ LEFT JOIN
   FROM VIEW_INV_SAP_PP_OPT_X
   )SALES_PP_X
 ON SALES_PP_X.ID = OPEN_SO_BASIC.ID;
+
+create table inv_sap_backlog_so as 
+select * from VIEW_INV_SAP_BACKLOG_SO;
+SELECT * FROM inv_sap_backlog_so WHERE ID = '80026-146-56-R_5200';
+SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE ID = '80026-146-56-R_5200';
+
+--VIEW_INV_SAP_SO_STATISTICS
+--1.pass-due open qty and line
+--2.LT open so qty and line
+--3.(13weeks - LT) open so qty and line
+--4. 13weeks after (Long Committed Date) open so qty and line
+--5.All open so qty and line.
+--LT 5040 14, 5050 8,5100 10,5110 11,5110 13,5160 16, 5190 16, 5200 10,5070 14, 5140 14
+
+-- 5040 14,5110 13,5070 14, 5140 14
+	
+	SELECT
+        MATERIAL
+        ||'_'
+        ||PLANT              AS ID,
+        MATERIAL             AS MATERIALID,
+        PLANT                AS PLANTID,
+        NVL(SUM(OPEN_QTY),0) AS LT14_OPEN_QTY
+      FROM INV_SAP_SALES_VBAK_VBAP_VBUP WHERE MAX_COMMIT_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 14)
+	  AND PLANT IN ('5040','5110','5070','5140')
+      GROUP BY MATERIAL
+        ||'_'
+        ||PLANT,
+        MATERIAL,
+        PLANT
+		
+SALESDOC||'_'||SALESDOCITEM||'_'||MATERIAL AS SALES_ID,
+    --Sales Orders Status
+    SELECT BACKLOG_OPEN.ID                   AS ID,
+      NVL(BACKLOG_OPEN.BACKLOG_OPEN_QTY,0)           AS BACKLOG_OPEN_QTY,
+      NVL(PAST_DUE_OPEN.PAST_DUE_QTY,0) AS PAST_DUE_QTY
+    FROM
+      (SELECT
+        MATERIAL
+        ||'_'
+        ||PLANT              AS ID,
+        MATERIAL             AS MATERIALID,
+        PLANT                AS PLANTID,
+        NVL(SUM(OPEN_QTY),0) AS BACKLOG_OPEN_QTY
+      FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+      GROUP BY MATERIAL
+        ||'_'
+        ||PLANT,
+        MATERIAL,
+        PLANT
+      )BACKLOG_OPEN
+    LEFT JOIN
+      (SELECT MATERIAL
+        ||'_'
+        ||PLANT               AS ID,
+        MATERIAL              AS MATERIALID,
+        PLANT                 AS PLANTID,
+        NVL(SUM(OPEN_QTY), 0) AS PAST_DUE_QTY
+      FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DBLINK
+      WHERE MAX_COMMIT_DATE < SYSDATE - 1
+      GROUP BY MATERIAL
+        ||'_'
+        ||PLANT,
+        MATERIAL,
+        PLANT
+      )PAST_DUE_OPEN
+    ON PAST_DUE_OPEN.ID = BACKLOG_OPEN.ID;
+
+
+
+
+
+--VIEW_INV_SAP_INV_DETAIL
+CREATE VIEW VIEW_INV_SAP_INV_DETAIL AS
+SELECT INV_BASIC.ID              AS ID,
+    INV_BASIC.PLANT                 AS PLANT,
+    INV_BASIC.MATERIAL              AS MATERIAL,
+    INV_BASIC.TOTAL_QTY             AS TOTAL_QTY,
+    INV_BASIC.LAST_REVIEW_DATE      AS LAST_REVIEW_DATE,
+    INV_BASIC.LOCATION              AS LOCATION,
+    ITEM_BASIC.Material_Description AS Material_Description,
+    ITEM_BASIC.BU                   AS BU,
+    ITEM_BASIC.Procurement_Type     AS Procurement_Type,
+    ITEM_BASIC.MATL_TYPE            AS MATL_TYPE,
+    ITEM_BASIC.MRP_TYPE             AS MRP_TYPE,
+    ITEM_BASIC.Stock_Strategy       AS Stock_Strategy,
+    ITEM_BASIC.Safety_Stock_Qty     AS Safety_Stock_Qty,
+    ITEM_BASIC.LEAD_TIME                  AS LEAD_TIME
+  FROM
+    (SELECT MATERIALID
+      ||'_'
+      ||PLANTID     AS ID,
+      MATERIALID    AS MATERIAL,
+      PLANTID       AS PLANT,
+      LOCATIONID    AS LOCATION,
+      NVL(OH_QTY,0) AS TOTAL_QTY,
+      ASOFDATE      AS LAST_REVIEW_DATE
+    FROM DWQ$LIBRARIAN.INV_SAP_INVENTORY_BY_PLANT@ROCKWELL_DBLINK
+    WHERE PLANTID IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140') --- ALL PLANTS HERE!!
+    )INV_BASIC
+  LEFT JOIN
+    (SELECT MATERIALID
+      ||'_'
+      ||PLANTID            AS ID,
+      MATERIALID           AS MATERIALID,
+      PLANTID              AS PLANTID,
+      MAT_DESC             AS Material_Description,
+      SUBSTR(PROD_BU,0,3)              AS BU,
+      PROC_TYPE            AS Procurement_Type,
+      MRP_CONTROLLER_DISPO AS MRP_CONTROLLER_ID,
+      MRP_CONTROLLER       AS MRP_CONTROLLER,
+      MATL_TYPE_MTART      AS MATL_TYPE,
+      MRP_TYPE             AS MRP_TYPE,
+      STRATEGY_GRP         AS Stock_Strategy,
+      UNIT_COST            AS Unit_Price,
+      NVL(REORDER_PT,0)    AS Reorder_Point,
+      NVL(SAFETY_STK,0)    AS Safety_Stock_Qty,
+      (GRT+PDT)                 AS LEAD_TIME
+    FROM DWQ$LIBRARIAN.INV_SAP_PP_OPTIMIZATION@ROCKWELL_DBLINK
+    WHERE PLANTID IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140') --- ALL PLANTS HERE!!
+    )ITEM_BASIC
+  ON ITEM_BASIC.ID = INV_BASIC.ID;
+
+--VIEW_INV_SAP_BACKLOG_INV
 
 
 
