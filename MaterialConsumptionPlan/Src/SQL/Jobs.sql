@@ -916,3 +916,13 @@ ON SOPO_OPEN_QTY.ID = INV_BASIC.ID;
 
 
 
+
+
+
+
+
+
+
+--DELIVERY RECORD
+
+
