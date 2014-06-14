@@ -1496,3 +1496,13 @@ LEFT JOIN
   FROM INV_SAP_SALES_HST
   )HST
 ON HST.ID = DELIVERY.SALE_ID;
+
+
+
+
+
+SELECT TO_CHAR(SYSDATE,'iw') AS weekn,
+  TO_CHAR(to_date('20050425','yyyymmdd'),'iw')      AS week1,
+  TO_CHAR(to_date('20050501','yyyymmdd'),'iw')      AS week2,
+  TO_CHAR(to_date('20050502','yyyymmdd'),'iw')      AS weekn2
+FROM dual; 
