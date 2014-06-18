@@ -170,6 +170,10 @@ LEFT JOIN
   )FC_AVG_WEEK
 ON FC_AVG_WEEK.ID = SVD_REPORT.ID;
 
+
+
+
+
 ---Local Version
 DROP VIEW VIEW_SVD_REPORT;
 SELECT count(*) FROM VIEW_SVD_REPORT;
@@ -218,7 +222,9 @@ FROM
       SVD_BASISC_INFO.DUE_OPEN_QTY_THREE_WEEKS AS DUE_OPEN_QTY_THREE_WEEKS,
       STOCK_IN_TRAINST.STOCK_IN_TRANSIT_QTY    AS STOCK_IN_TRANSIT_QTY
     FROM
-      (SELECT PP_INFO.ID                                   AS ID,
+      (
+      
+      SELECT PP_INFO.ID                                   AS ID,
         PP_INFO.MATERIALID                                 AS MATERIAL,
         PP_INFO.PLANTID                                    AS PLANT,
         PP_INFO.STRATEGY_GRP                               AS STRATEGY_GRP,
@@ -244,7 +250,10 @@ FROM
         AND PLANTID         IN ('5041', '5051', '5101', '5111', '5121', '5161', '5191', '5201','5071','5141')
         )PP_INFO
       LEFT JOIN
-        (SELECT BACKLOG_PASTDUE.ID                    AS ID,
+        (
+        
+        
+        SELECT BACKLOG_PASTDUE.ID                    AS ID,
           BACKLOG_PASTDUE.BACKLOG_OPEN                AS BACKLOG_OPEN,
           BACKLOG_PASTDUE.PAST_DUE_OPEN               AS PAST_DUE_OPEN,
           DUE_IN_THREE_WEEKS.DUE_OPEN_QTY_THREE_WEEKS AS DUE_OPEN_QTY_THREE_WEEKS
@@ -294,8 +303,7 @@ FROM
             PLANT         AS PLANTID,
             SUM(OPEN_QTY) AS DUE_OPEN_QTY_THREE_WEEKS
           FROM INV_SAP_SALES_VBAK_VBAP_VBUP
-          WHERE PLANT                                                      IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
-          AND (MAX_COMMIT_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 21))
+          WHERE (MAX_COMMIT_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 21))
           GROUP BY MATERIAL
             ||'_'
             ||PLANT,
@@ -306,6 +314,8 @@ FROM
         )BACKLOG_PASTDUE_DUE_THREE ON BACKLOG_PASTDUE_DUE_THREE.ID = PP_INFO.ID
       )SVD_BASISC_INFO
     LEFT JOIN
+    
+    --Stock In Stransit To DC
       (SELECT MATERIALID
         ||'_'
         ||PLANTID AS ID,
@@ -327,16 +337,17 @@ FROM
     ON STOCK_IN_TRAINST.ID               = SVD_BASISC_INFO.ID
     )SVD_REPORT_ADD ON SVD_REPORT_ADD.ID = OPEN_ORDER_MATERIAL.ID
   )SVD_REPORT
+  
 LEFT JOIN
+--13 weeks Fc Qty
   (SELECT MATERIALID
     ||'_'
     ||PLANTID                           AS ID,
     MATERIALID                          AS MATERIALID,
     PLANTID                             AS PLANTID,
-    CEIL(SUM(PLNMG_PLANNEDQUANTITY)/26) AS FC_AVG26_WEEK
+    CEIL(SUM(PLNMG_PLANNEDQUANTITY)/13) AS FC_AVG13_WEEK
   FROM INV_SAP_PP_FRCST_PBIM_PBED
-  WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
-  AND PLANTID                                                                        IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+  WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 91))
   AND VERSBP_VERSION = '55'
   GROUP BY MATERIALID,
     MATERIALID
@@ -345,7 +356,31 @@ LEFT JOIN
     PLANTID,
     MATERIALID
   )FC_AVG_WEEK
+  
 ON FC_AVG_WEEK.ID = SVD_REPORT.ID;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 --Add Sales Orders detail review

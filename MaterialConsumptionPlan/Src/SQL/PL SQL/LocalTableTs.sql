@@ -1498,6 +1498,184 @@ LEFT JOIN
 ON HST.ID = DELIVERY.SALE_ID;
 
 
+--VIEW_INV_SAP_SO_STATISTICS
+--1.pass-due open qty and line
+--2.LT open so qty and line
+--3.(13weeks - LT) open so qty and line
+--4. 13weeks after (Long Committed Date) open so qty and line
+--5.All open so qty and line.
+--LT 5040 14, 5050 8,5100 10,5110 11,5110 13,5160 16, 5190 16, 5200 10,5070 14, 5140 14
 
+-- 5040 14,5110 13,5070 14, 5140 14
 
-select * from VIEW_INV_SAP_PP_OPT_X where id = 'U-00820919685507_1090'
+---NEED TO CREATE AND THINK.....
+
+--Due Outside 13weeks
+SELECT MATERIAL
+  ||'_'
+  ||PLANT       AS ID,
+  MATERIAL      AS MATERIALID,
+  PLANT         AS PLANTID,
+  SUM(OPEN_QTY) AS OPEN_QTY_OUT_13WEEKS
+FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+WHERE MAX_COMMIT_DATE > SYSDATE + 91
+GROUP BY MATERIAL
+  ||'_'
+  ||PLANT,
+  MATERIAL,
+  PLANT;
+  
+--PAST DUE QTY
+SELECT MATERIAL
+  ||'_'
+  ||PLANT       AS ID,
+  MATERIAL      AS MATERIALID,
+  PLANT         AS PLANTID,
+  SUM(OPEN_QTY) AS OPEN_QTY_PAST_DUE
+FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+WHERE MAX_COMMIT_DATE < SYSDATE - 1
+GROUP BY MATERIAL
+  ||'_'
+  ||PLANT,
+  MATERIAL,
+  PLANT;
+  
+--BACK LOG OPEN OTY
+SELECT MATERIAL
+  ||'_'
+  ||PLANT       AS ID,
+  MATERIAL      AS MATERIALID,
+  PLANT         AS PLANTID,
+  SUM(OPEN_QTY) AS OPEN_QTY_BACKLOG
+FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+GROUP BY MATERIAL
+  ||'_'
+  ||PLANT,
+  MATERIAL,
+  PLANT;
+  
+  
+  
+  
+  
+  
+  
+  
+  SELECT * FROM INV_SAP_PP_FRCST_PBIM_PBED WHERE MATERIALID = '1756-IB16 A' AND PLANTID = '5040' AND VERSBP_VERSION = '00'
+  
+  
+  SELECT M_C.MATERIALID,
+        M_C.CATALOG_STRING1
+  FROM
+  (
+  SELECT CATALOG_STRING1,
+MATERIALID FROM INV_SAP_MATERIAL_CATALOG
+  )M_C
+  LEFT JOIN
+  (
+  SELECT MATERIAL FROM TEMP
+  )TP
+  ON TP.MATERIAL = M_C.MATERIALID;
+-----------------------------------------------------------
+SELECT ID,
+      MATERIALID,
+      SUM(WEEK_1)  AS WK_1,
+      SUM(WEEK_2)  AS WK_2,
+      SUM(WEEK_3)  AS WK_3,
+      SUM(WEEK_4)  AS WK_4,
+      SUM(WEEK_5)  AS WK_5,
+      SUM(WEEK_6)  AS WK_6,
+      SUM(WEEK_7)  AS WK_7,
+      SUM(WEEK_8)  AS WK_8,
+      SUM(WEEK_9)  AS WK_9,
+      SUM(WEEK_10) AS WK_10,
+      SUM(WEEK_11) AS WK_11,
+      SUM(WEEK_12) AS WK_12,
+      SUM(WEEK_13) AS WK_13
+    FROM
+      (SELECT MATERIALID
+        ||'_'
+        ||PLANTID AS ID,
+        MATERIALID,
+        CASE
+          WHEN WEEK_NUMBER <= TO_CHAR(SYSDATE,'iw')
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_1,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 1
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_2,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 2
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_3,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 3
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_4,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 4
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_5,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 5
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_6,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 6
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_7,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 7
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_8,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 8
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_9,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 9
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_10,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 10
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_11,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 11
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_12,
+        CASE
+          WHEN WEEK_NUMBER = TO_CHAR(SYSDATE,'iw') + 12
+          THEN OPEN_PO_QTY
+          ELSE 0
+        END WEEK_13,
+        PLANTID
+      FROM
+        (SELECT MATERIALID
+          ||'_'
+          ||PLANTID AS ID,
+          MATERIALID,
+          PLANTID,
+          TO_CHAR(DATEDELIVERY,'iw') AS WEEK_NUMBER,
+          PONUMBER,
+          PO_OPENQTY                 AS OPEN_PO_QTY
+        FROM INV_SAP_IO_INPUTS_DAILY
+        WHERE INPUT_TYPE = 'PLAN_PD_PO'
+        AND DATEDELIVERY             < TO_CHAR(sysdate + 91) and materialid = '1756-IB16 A' and plantid = '5040'
+        )
+      )
+    GROUP BY ID,
+      MATERIALID;
