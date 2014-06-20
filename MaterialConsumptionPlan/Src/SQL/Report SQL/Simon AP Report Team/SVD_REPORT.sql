@@ -16,6 +16,29 @@
 --'5041', '5051', '5101', '5111', '5121', '5161', '5191', '5201','5071','5141'
 --'5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140'
 
+--New Version of the SVD Reports
+--Material
+--Ship Plant
+--Supply Plant
+--Business Unit
+--Strategy Group
+--Safety Stock
+--Weekly Usage (Avg 13wks)
+--Weekly Forecast (Avg 13wks)
+--DC On Hand Inventory
+--In Transit to DC
+--Total Open
+--Past Due
+--Due within Transit
+--Due outside Transit till 13 wks
+--Due outside 13 wks
+--No Due Date
+--Days of Supply
+--13wk Intake vs Forecast
+--Issue Indicator
+--Planner Review Comment
+--Last Comment Date
+
 SELECT * FROM SVD_REPORT_DEMO;
 CREATE VIEW VIEW_SVD_REPORT AS
 SELECT SVD_REPORT.ID        AS ID,
@@ -1140,11 +1163,4 @@ LEFT JOIN
   )WHERE (COMMITTED_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 14)) AND PLANT                  IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
 
 ----SALES ORDER
-CREATE VIEW VIEW_INV_SVD_OPEN_SO AS
-SELECT * FROM VIEW_INV_SAP_OPEN_SO ;
-CREATE VIEW VIEW_INV_SVD_BACKLOG AS
-SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE COMMITTED_DATE < SYSDATE + 91 AND MATERIAL = '100-C09EJ10 A';
-CREATE VIEW VIEW_INV_SVD_PASS_DUE AS
-SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE COMMITTED_DATE < SYSDATE - 1;
-CREATE VIEW VIEW_INV_SVD_THREE_WEEKS AS
-SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE COMMITTED_DATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 21);
+
