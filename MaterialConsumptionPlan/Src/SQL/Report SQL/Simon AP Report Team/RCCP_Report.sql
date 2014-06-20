@@ -669,7 +669,7 @@ FROM
               BEDAEP_REQUIREMENTSTYPE,
               VERSBP_VERSION
             FROM INV_SAP_PP_FRCST_PBIM_PBED
-            WHERE VERSBP_VERSION = '00'
+            WHERE VERSBP_VERSION = '00' 
             AND PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 91)
             )
           )
@@ -710,7 +710,7 @@ FROM
           OUT_QTY_W12,
           OUT_QTY_W13
         FROM VIEW_INV_SAP_PP_OPT_X
-        WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+        WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140') 
         )RCCP_BASIC
       ON IndReq.ID = RCCP_BASIC.ID
       )RCCP_BASIC_IND
@@ -927,7 +927,7 @@ FROM
               TO_CHAR(COMMITTED_DATE,'iw') AS WEEK_NUMBER,
               COMMITTEDQTY                 AS SHOPPING_CART_OPEN
             FROM INV_SAP_PP_PO_HISTORY
-            WHERE BSART_PURCHDOCTYPE       = 'ZUB'
+            WHERE BSART_PURCHDOCTYPE       = 'ZUB' 
             AND ELIKZDELIVERYCOMPLETEDIND IS NULL
             AND COMMITTED_DATE             < TO_CHAR(sysdate + 91)
             )
