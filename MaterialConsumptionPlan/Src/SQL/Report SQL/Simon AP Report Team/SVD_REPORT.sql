@@ -61,29 +61,29 @@ SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE COMMITTED_DATE IS NULL;
 DROP VIEW VIEW_INV_SAP_SVD_REPORT;
 DROP TABLE INV_SAP_SVD_REPORT;
 SELECT * FROM VIEW_INV_SAP_SVD_REPORT;
-SELECT * FROM INV_SAP_SVD_REPORT;
+SELECT * FROM INV_SAP_SVD_REPORT WHERE TOT_OPEN_QTY <> 0 OR  STOCK_IN_TRANSIT_QTY <> 0 OR OH_QTY <> 0;
 CREATE TABLE INV_SAP_SVD_REPORT AS 
 SELECT * FROM VIEW_INV_SAP_SVD_REPORT;
 CREATE VIEW VIEW_INV_SAP_SVD_REPORT AS
-SELECT SPPX_FC_TRIN_OPEN_NOCM.ID AS ID,
-  SPPX_FC_TRIN_OPEN_NOCM.MATERIAL AS MATERIAL,
-  SPPX_FC_TRIN_OPEN_NOCM.CATALOG_DASH AS CATALOG_DASH,
-  SPPX_FC_TRIN_OPEN_NOCM.PLANT AS PLANT,
-  SPPX_FC_TRIN_OPEN_NOCM.VENDOR AS VENDOR,
-  SPPX_FC_TRIN_OPEN_NOCM.BU AS BU,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.LEAD_TIME,0) AS LEAD_TIME,
-  SPPX_FC_TRIN_OPEN_NOCM.STRATEGY_GRP AS STRATEGY_GRP,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.SAFETY_STOCK,0) AS SAFETY_STOCK,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.AVG13_USAGE_QTY,0) AS AVG13_USAGE_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.FC_AVG13_WEEK_QTY,0) AS FC_AVG13_WEEK_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.OH_QTY,0) AS OH_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.STOCK_IN_TRANSIT_QTY,0) AS STOCK_IN_TRANSIT_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_OPEN_QTY,0) AS TOT_OPEN_QTY,
-  NVL(SO_STAT.PASS_DUE_QTY,0) AS PASS_DUE_QTY,
-  NVL(SO_STAT.LT_OPEN_QTY,0) AS LT_OPEN_QTY,
-  NVL(SO_STAT.LT_WEEKS13_OPEN_QTY,0) AS LT_WEEKS13_OPEN_QTY,
-  NVL(SO_STAT.OUT_WEEKS13_OPEN_QTY,0) AS OUT_WEEKS13_OPEN_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_NO_COMMITTED_DATE_QTY,0) AS TOT_NO_COMMITTED_DATE_QTY,
+SELECT SPPX_FC_TRIN_OPEN_NOCM.ID                                                                                                       AS ID,
+  SPPX_FC_TRIN_OPEN_NOCM.MATERIAL                                                                                                      AS MATERIAL,
+  SPPX_FC_TRIN_OPEN_NOCM.CATALOG_DASH                                                                                                  AS CATALOG_DASH,
+  SPPX_FC_TRIN_OPEN_NOCM.PLANT                                                                                                         AS PLANT,
+  SPPX_FC_TRIN_OPEN_NOCM.VENDOR                                                                                                        AS VENDOR,
+  SPPX_FC_TRIN_OPEN_NOCM.BU                                                                                                            AS BU,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.LEAD_TIME,0)                                                                                              AS LEAD_TIME,
+  SPPX_FC_TRIN_OPEN_NOCM.STRATEGY_GRP                                                                                                  AS STRATEGY_GRP,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.SAFETY_STOCK,0)                                                                                           AS SAFETY_STOCK,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.AVG13_USAGE_QTY,0)                                                                                        AS AVG13_USAGE_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.FC_AVG13_WEEK_QTY,0)                                                                                      AS FC_AVG13_WEEK_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.OH_QTY,0)                                                                                                 AS OH_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.STOCK_IN_TRANSIT_QTY,0)                                                                                   AS STOCK_IN_TRANSIT_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_OPEN_QTY,0)                                                                                           AS TOT_OPEN_QTY,
+  NVL(SO_STAT.PASS_DUE_QTY,0)                                                                                                          AS PASS_DUE_QTY,
+  NVL(SO_STAT.LT_OPEN_QTY,0)                                                                                                           AS LT_OPEN_QTY,
+  NVL(SO_STAT.LT_WEEKS13_OPEN_QTY,0)                                                                                                   AS LT_WEEKS13_OPEN_QTY,
+  NVL(SO_STAT.OUT_WEEKS13_OPEN_QTY,0)                                                                                                  AS OUT_WEEKS13_OPEN_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_NO_COMMITTED_DATE_QTY,0)                                                                              AS TOT_NO_COMMITTED_DATE_QTY,
   NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_OPEN_QTY,0)+NVL(SPPX_FC_TRIN_OPEN_NOCM.STOCK_IN_TRANSIT_QTY,0)+ NVL(SPPX_FC_TRIN_OPEN_NOCM.OH_QTY, 0) AS CHECK_KEY
 FROM
   (SELECT SPPX_FC_TRIN_OPEN.ID,
@@ -152,10 +152,12 @@ FROM
             OH_QTY,
             STRATEGY_GRP,
             SUBSTR(VENDOR_KEY,0,4) AS VENDOR,
-            SUBSTR(PROD_BU,0,3) AS BU,
+            SUBSTR(PROD_BU,0,3)    AS BU,
             AVG13_USAGE_QTY,
             LEAD_TIME
-          FROM VIEW_INV_SAP_PP_OPT_X WHERE MATL_TYPE IN ('ZTG','ZFG') AND PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+          FROM VIEW_INV_SAP_PP_OPT_X
+          WHERE MATL_TYPE IN ('ZTG','ZFG')
+          AND PLANT       IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
           )SALES_PP_X
         LEFT JOIN
           ---FC 13 WEEKS AVG
@@ -199,12 +201,14 @@ FROM
     LEFT JOIN
       --TOT OPEN
       (
-      SELECT ID,
+      SELECT MATERIAL
+        ||'_'
+        || PLANT AS ID,
         MATERIAL,
         PLANT,
         NVL(SUM(OPEN_QTY),0) AS TOT_OPEN_QTY
-      FROM VIEW_INV_SAP_OPEN_SO
-      GROUP BY ID,
+      FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+      GROUP BY 
         MATERIAL,
         PLANT
       )TOT_OPEN
@@ -213,13 +217,15 @@ FROM
   LEFT JOIN
     --TOT NO_COMMITTED_DATE
     (
-    SELECT ID,
+    SELECT MATERIAL
+      ||'_'
+      || PLANT AS ID,
       MATERIAL,
       PLANT,
       NVL(SUM(OPEN_QTY),0) AS TOT_NO_COMMITTED_DATE_QTY
-    FROM VIEW_INV_SAP_OPEN_SO
-    WHERE COMMITTED_DATE IS NULL
-    GROUP BY ID,
+    FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+    WHERE MAX_COMMIT_DATE IS NULL 
+    GROUP BY 
       MATERIAL,
       PLANT
     )NO_COMMITTED_DATE
