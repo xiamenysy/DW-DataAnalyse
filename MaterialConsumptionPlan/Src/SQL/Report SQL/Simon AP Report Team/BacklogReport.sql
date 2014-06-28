@@ -4,43 +4,60 @@
 
 --DASH BOARD
 DROP VIEW VIEW_INV_SAP_BACKLOG_DB;
-SELECT * FROM VIEW_INV_SAP_BACKLOG_DB;
+DROP TABLE INV_SAP_BACKLOG_DB;
+SELECT COUNT(*) FROM INV_SAP_BACKLOG_DB;
+CREATE TABLE INV_SAP_BACKLOG_DB AS
+SELECT *
+FROM VIEW_INV_SAP_BACKLOG_DB
+WHERE PLANT IN ('5040',
+  '5050',
+  '5100',
+  '5110',
+  '5120',
+  '5160',
+  '5190',
+  '5200',
+  '5070',
+  '5140') AND CHECK_KEY <> 0;
+  
 CREATE VIEW VIEW_INV_SAP_BACKLOG_DB AS
-SELECT CUST_VEN_SO_PO.ID                   AS ID,
-  CUST_VEN_SO_PO.PROC_TYPE                 AS PROC_TYPE,
-  CUST_VEN_SO_PO.PLANT                     AS PLANT,
-  CUST_VEN_SO_PO.MATERIAL                  AS MATERIAL,
-  CUST_VEN_SO_PO.CATALOG_DASH              AS CATALOG_DASH,
-  CUST_VEN_SO_PO.MAT_DESC                  AS MAT_DESC,
-  CUST_VEN_SO_PO.BU                        AS BU,
-  CUST_VEN_SO_PO.UNIT_COST                 AS UNIT_COST,
-  CUST_VEN_SO_PO.STRATEGY_GRP              AS STRATEGY_GRP,
-  CUST_VEN_SO_PO.LEAD_TIME                 AS LEAD_TIME,
-  CUST_VEN_SO_PO.MRP_CONTROLLER            AS MRP_CONTROLLER,
-  CUST_VEN_SO_PO.PURCH_GROUP               AS PURCH_GROUP,
-  CUST_VEN_SO_PO.MATL_TYPE                 AS MATL_TYPE ,
-  CUST_VEN_SO_PO.MRP_TYPE                  AS MRP_TYPE,
-  CUST_VEN_SO_PO.AVG13_USAGE_QTY           AS AVG13_USAGE_QTY,
-  CUST_VEN_SO_PO.FC_AVG13_WEEK_QTY         AS FC_AVG13_WEEK_QTY,
-  CUST_VEN_SO_PO.MIN_INV                   AS MIN_INV,
-  CUST_VEN_SO_PO.TARGET_INV                AS TARGET_INV,
-  CUST_VEN_SO_PO.MAX_INV                   AS MAX_INV,
-  CUST_VEN_SO_PO.PLANT                     AS VENDOR,
-  CUST_VEN_SO_PO.SAFETY_STOCK              AS VENDOR_SAFETY_STOCK,
-  CUST_VEN_SO_PO.STRATEGY_GRP              AS VENDOR_STRATEGY_GRP,
-  CUST_VEN_SO_PO.LEAD_TIME                 AS VENDOR_LEAD_TIME,
-  CUST_VEN_SO_PO.FC_AVG13_WEEK_QTY         AS VENDOR_FC_AVG13_WEEK_QTY,
-  CUST_VEN_SO_PO.TOT_OPEN_QTY              AS TOT_OPEN_QTY,
-  CUST_VEN_SO_PO.PASS_DUE_QTY              AS PASS_DUE_QTY,
-  CUST_VEN_SO_PO.LT_OPEN_QTY               AS LT_OPEN_QTY,
-  CUST_VEN_SO_PO.LT_WEEKS13_OPEN_QTY       AS LT_WEEKS13_OPEN_QTY,
-  CUST_VEN_SO_PO.OUT_WEEKS13_OPEN_QTY      AS OUT_WEEKS13_OPEN_QTY,
-  CUST_VEN_SO_PO.TOT_NO_COMMITTED_DATE_QTY AS TOT_NO_COMMITTED_DATE_QTY,
-  CUST_VEN_SO_PO.STOCK_IN_TRANSIT_QTY      AS STOCK_IN_TRANSIT_QTY,
-  CUST_VEN_SO_PO.PO_OPEN_QTY_ALL           AS PO_OPEN_QTY_ALL,
-  INV_STATS.TOTAL_QTY                      AS TOT_STOCK_QTY,
-  INV_STATS.LOCATION                       AS LOCATION,
-  CUST_VEN_SO_PO.SAFETY_STOCK              AS SAFETY_STOCK
+SELECT CUST_VEN_SO_PO.ID                                                                                    AS ID,
+  CUST_VEN_SO_PO.PROC_TYPE                                                                                  AS PROC_TYPE,
+  CUST_VEN_SO_PO.PLANT                                                                                      AS PLANT,
+  CUST_VEN_SO_PO.MATERIAL                                                                                   AS MATERIAL,
+  CUST_VEN_SO_PO.CATALOG_DASH                                                                               AS CATALOG_DASH,
+  CUST_VEN_SO_PO.MAT_DESC                                                                                   AS MAT_DESC,
+  CUST_VEN_SO_PO.BU                                                                                         AS BU,
+  CUST_VEN_SO_PO.UNIT_COST                                                                                  AS UNIT_COST,
+  CUST_VEN_SO_PO.STRATEGY_GRP                                                                               AS STRATEGY_GRP,
+  CUST_VEN_SO_PO.SAFETY_STOCK                                                                               AS SAFETY_STOCK,
+  CUST_VEN_SO_PO.LEAD_TIME                                                                                  AS LEAD_TIME,
+  CUST_VEN_SO_PO.MRP_CONTROLLER                                                                             AS MRP_CONTROLLER,
+  CUST_VEN_SO_PO.PURCH_GROUP                                                                                AS PURCH_GROUP,
+  CUST_VEN_SO_PO.MATL_TYPE                                                                                  AS MATL_TYPE,
+  CUST_VEN_SO_PO.MRP_TYPE                                                                                   AS MRP_TYPE,
+  CEIL(CUST_VEN_SO_PO.AVG13_USAGE_QTY)                                                                      AS AVG13_USAGE_QTY,
+  NVL(CUST_VEN_SO_PO.FC_AVG13_WEEK_QTY,0)                                                                   AS FC_AVG13_WEEK_QTY,
+  CUST_VEN_SO_PO.MIN_INV                                                                                    AS MIN_INV,
+  CUST_VEN_SO_PO.TARGET_INV                                                                                 AS TARGET_INV,
+  CUST_VEN_SO_PO.MAX_INV                                                                                    AS MAX_INV,
+  CUST_VEN_SO_PO.VENDOR                                                                                     AS VENDOR,
+  CUST_VEN_SO_PO.VENDOR_SAFETY_STOCK                                                                        AS VENDOR_SAFETY_STOCK,
+  CUST_VEN_SO_PO.VENDOR_STRATEGY_GRP                                                                        AS VENDOR_STRATEGY_GRP,
+  CUST_VEN_SO_PO.VENDOR_LEAD_TIME                                                                           AS VENDOR_LEAD_TIME,
+  NVL(CUST_VEN_SO_PO.VENDOR_FC_AVG13_WEEK_QTY,0)                                                            AS VENDOR_FC_AVG13_WEEK_QTY,
+  NVL(CUST_VEN_SO_PO.TOT_OPEN_QTY,0)                                                                        AS TOT_OPEN_QTY,
+  NVL(CUST_VEN_SO_PO.PASS_DUE_QTY,0)                                                                        AS PASS_DUE_QTY,
+  NVL(CUST_VEN_SO_PO.LT_OPEN_QTY,0)                                                                         AS LT_OPEN_QTY,
+  NVL(CUST_VEN_SO_PO.LT_WEEKS13_OPEN_QTY,0)                                                                 AS LT_WEEKS13_OPEN_QTY,
+  NVL(CUST_VEN_SO_PO.OUT_WEEKS13_OPEN_QTY,0)                                                                AS OUT_WEEKS13_OPEN_QTY,
+  NVL(CUST_VEN_SO_PO.TOT_NO_COMMITTED_DATE_QTY,0)                                                           AS TOT_NO_COMMITTED_DATE_QTY,
+  NVL(CUST_VEN_SO_PO.PO_OPEN_QTY_ALL,0)                                                                     AS PO_OPEN_QTY_ALL,
+  NVL(CUST_VEN_SO_PO.STOCK_IN_TRANSIT_QTY,0)                                                                AS STOCK_IN_TRANSIT_QTY,
+  (NVL(CUST_VEN_SO_PO.PO_OPEN_QTY_ALL,0) - NVL(CUST_VEN_SO_PO.STOCK_IN_TRANSIT_QTY,0))                      AS UNSHIP_QTY,
+  NVL(INV_STATS.TOTAL_QTY,0)                                                                                AS TOT_STOCK_QTY,
+  (NVL(INV_STATS.TOTAL_QTY,0)         *NVL(CUST_VEN_SO_PO.UNIT_COST,0))                                     AS STOCK_VALUE,
+  (NVL(CUST_VEN_SO_PO.TOT_OPEN_QTY,0) + NVL(CUST_VEN_SO_PO.PO_OPEN_QTY_ALL,0) + NVL(INV_STATS.TOTAL_QTY,0)) AS CHECK_KEY
 FROM
   (SELECT CUSTOMER_VENDOR_SO.ID                  AS ID,
     CUSTOMER_VENDOR_SO.PROC_TYPE                 AS PROC_TYPE,
@@ -62,11 +79,11 @@ FROM
     CUSTOMER_VENDOR_SO.MIN_INV                   AS MIN_INV,
     CUSTOMER_VENDOR_SO.TARGET_INV                AS TARGET_INV,
     CUSTOMER_VENDOR_SO.MAX_INV                   AS MAX_INV,
-    CUSTOMER_VENDOR_SO.PLANT                     AS VENDOR,
-    CUSTOMER_VENDOR_SO.SAFETY_STOCK              AS VENDOR_SAFETY_STOCK,
-    CUSTOMER_VENDOR_SO.STRATEGY_GRP              AS VENDOR_STRATEGY_GRP,
-    CUSTOMER_VENDOR_SO.LEAD_TIME                 AS VENDOR_LEAD_TIME,
-    CUSTOMER_VENDOR_SO.FC_AVG13_WEEK_QTY         AS VENDOR_FC_AVG13_WEEK_QTY,
+    CUSTOMER_VENDOR_SO.VENDOR                    AS VENDOR,
+    CUSTOMER_VENDOR_SO.VENDOR_SAFETY_STOCK       AS VENDOR_SAFETY_STOCK,
+    CUSTOMER_VENDOR_SO.VENDOR_STRATEGY_GRP       AS VENDOR_STRATEGY_GRP,
+    CUSTOMER_VENDOR_SO.VENDOR_LEAD_TIME          AS VENDOR_LEAD_TIME,
+    CUSTOMER_VENDOR_SO.VENDOR_FC_AVG13_WEEK_QTY  AS VENDOR_FC_AVG13_WEEK_QTY,
     CUSTOMER_VENDOR_SO.TOT_OPEN_QTY              AS TOT_OPEN_QTY,
     CUSTOMER_VENDOR_SO.PASS_DUE_QTY              AS PASS_DUE_QTY,
     CUSTOMER_VENDOR_SO.LT_OPEN_QTY               AS LT_OPEN_QTY,
@@ -76,38 +93,38 @@ FROM
     CUSTOMER_VENDOR_SO.STOCK_IN_TRANSIT_QTY      AS STOCK_IN_TRANSIT_QTY,
     PO_STATS.PO_OPEN_QTY_ALL                     AS PO_OPEN_QTY_ALL
   FROM
-    (SELECT CUSTOMER_VENDOR.ID           AS ID,
-      CUSTOMER_VENDOR.PROC_TYPE          AS PROC_TYPE,
-      CUSTOMER_VENDOR.PLANT              AS PLANT,
-      CUSTOMER_VENDOR.MATERIAL           AS MATERIAL,
-      CUSTOMER_VENDOR.CATALOG_DASH       AS CATALOG_DASH,
-      CUSTOMER_VENDOR.MAT_DESC           AS MAT_DESC,
-      CUSTOMER_VENDOR.BU                 AS BU,
-      CUSTOMER_VENDOR.UNIT_COST          AS UNIT_COST,
-      CUSTOMER_VENDOR.STRATEGY_GRP       AS STRATEGY_GRP,
-      CUSTOMER_VENDOR.SAFETY_STOCK       AS SAFETY_STOCK,
-      CUSTOMER_VENDOR.LEAD_TIME          AS LEAD_TIME,
-      CUSTOMER_VENDOR.MRP_CONTROLLER     AS MRP_CONTROLLER,
-      CUSTOMER_VENDOR.PURCH_GROUP        AS PURCH_GROUP,
-      CUSTOMER_VENDOR.MATL_TYPE          AS MATL_TYPE ,
-      CUSTOMER_VENDOR.MRP_TYPE           AS MRP_TYPE,
-      CUSTOMER_VENDOR.AVG13_USAGE_QTY    AS AVG13_USAGE_QTY,
-      CUSTOMER_VENDOR.FC_AVG13_WEEK_QTY  AS FC_AVG13_WEEK_QTY,
-      CUSTOMER_VENDOR.MIN_INV            AS MIN_INV,
-      CUSTOMER_VENDOR.TARGET_INV         AS TARGET_INV,
-      CUSTOMER_VENDOR.MAX_INV            AS MAX_INV,
-      CUSTOMER_VENDOR.PLANT              AS VENDOR,
-      CUSTOMER_VENDOR.SAFETY_STOCK       AS VENDOR_SAFETY_STOCK,
-      CUSTOMER_VENDOR.STRATEGY_GRP       AS VENDOR_STRATEGY_GRP,
-      CUSTOMER_VENDOR.LEAD_TIME          AS VENDOR_LEAD_TIME,
-      CUSTOMER_VENDOR.FC_AVG13_WEEK_QTY  AS VENDOR_FC_AVG13_WEEK_QTY,
-      SO_STATS.TOT_OPEN_QTY              AS TOT_OPEN_QTY,
-      SO_STATS.PASS_DUE_QTY              AS PASS_DUE_QTY,
-      SO_STATS.LT_OPEN_QTY               AS LT_OPEN_QTY,
-      SO_STATS.LT_WEEKS13_OPEN_QTY       AS LT_WEEKS13_OPEN_QTY,
-      SO_STATS.OUT_WEEKS13_OPEN_QTY      AS OUT_WEEKS13_OPEN_QTY,
-      SO_STATS.TOT_NO_COMMITTED_DATE_QTY AS TOT_NO_COMMITTED_DATE_QTY,
-      SO_STATS.STOCK_IN_TRANSIT_QTY      AS STOCK_IN_TRANSIT_QTY
+    (SELECT CUSTOMER_VENDOR.ID                AS ID,
+      CUSTOMER_VENDOR.PROC_TYPE               AS PROC_TYPE,
+      CUSTOMER_VENDOR.PLANT                   AS PLANT,
+      CUSTOMER_VENDOR.MATERIAL                AS MATERIAL,
+      CUSTOMER_VENDOR.CATALOG_DASH            AS CATALOG_DASH,
+      CUSTOMER_VENDOR.MAT_DESC                AS MAT_DESC,
+      CUSTOMER_VENDOR.BU                      AS BU,
+      CUSTOMER_VENDOR.UNIT_COST               AS UNIT_COST,
+      CUSTOMER_VENDOR.STRATEGY_GRP            AS STRATEGY_GRP,
+      CUSTOMER_VENDOR.SAFETY_STOCK            AS SAFETY_STOCK,
+      CUSTOMER_VENDOR.LEAD_TIME               AS LEAD_TIME,
+      CUSTOMER_VENDOR.MRP_CONTROLLER          AS MRP_CONTROLLER,
+      CUSTOMER_VENDOR.PURCH_GROUP             AS PURCH_GROUP,
+      CUSTOMER_VENDOR.MATL_TYPE               AS MATL_TYPE ,
+      CUSTOMER_VENDOR.MRP_TYPE                AS MRP_TYPE,
+      CUSTOMER_VENDOR.AVG13_USAGE_QTY         AS AVG13_USAGE_QTY,
+      CUSTOMER_VENDOR.FC_AVG13_WEEK_QTY       AS FC_AVG13_WEEK_QTY,
+      CUSTOMER_VENDOR.MIN_INV                 AS MIN_INV,
+      CUSTOMER_VENDOR.TARGET_INV              AS TARGET_INV,
+      CUSTOMER_VENDOR.MAX_INV                 AS MAX_INV,
+      CUSTOMER_VENDOR.VENDOR                  AS VENDOR,
+      CUSTOMER_VENDOR.VENDOR_SAFETY_STOCK     AS VENDOR_SAFETY_STOCK,
+      CUSTOMER_VENDOR.VENDOR_STRATEGY_GRP     AS VENDOR_STRATEGY_GRP,
+      CUSTOMER_VENDOR.VENDOR_LEAD_TIME        AS VENDOR_LEAD_TIME,
+      CUSTOMER_VENDOR.ENDOR_FC_AVG13_WEEK_QTY AS VENDOR_FC_AVG13_WEEK_QTY,
+      SO_STATS.TOT_OPEN_QTY                   AS TOT_OPEN_QTY,
+      SO_STATS.PASS_DUE_QTY                   AS PASS_DUE_QTY,
+      SO_STATS.LT_OPEN_QTY                    AS LT_OPEN_QTY,
+      SO_STATS.LT_WEEKS13_OPEN_QTY            AS LT_WEEKS13_OPEN_QTY,
+      SO_STATS.OUT_WEEKS13_OPEN_QTY           AS OUT_WEEKS13_OPEN_QTY,
+      SO_STATS.TOT_NO_COMMITTED_DATE_QTY      AS TOT_NO_COMMITTED_DATE_QTY,
+      SO_STATS.STOCK_IN_TRANSIT_QTY           AS STOCK_IN_TRANSIT_QTY
     FROM
       (SELECT CUSTOMER.ID     AS ID,
         CUSTOMER.PROC_TYPE    AS PROC_TYPE,
@@ -230,7 +247,7 @@ SELECT OPEN_SO_BASIC.ID                                       AS ID,
   OPEN_SO_BASIC.REQUIRE_DATE                                  AS REQUIRE_DATE,
   OPEN_SO_BASIC.COMMITTED_DATE                                AS COMMITTED_DATE,
   OPEN_SO_BASIC.CONFIRM_DATE                                  AS CONFIRM_DATE,
-  (OPEN_SO_BASIC.COMMITTED_DATE - OPEN_SO_BASIC.CONFIRM_DATE) AS GAP,
+  0 AS GAP,
   OPEN_SO_BASIC.LST_ACT_GI_DATE                               AS LST_ACT_GI_DATE,
   OPEN_SO_BASIC.LST_DELIVERY_CREATE_DATE                      AS LST_DELIVERY_CREATE_DATE,
   OPEN_SO_BASIC.ORDER_QTY                                     AS ORDER_QTY,
@@ -241,6 +258,7 @@ SELECT OPEN_SO_BASIC.ID                                       AS ID,
   OPEN_SO_BASIC.SALES_PRICE                                   AS SALES_PRICE,
   OPEN_SO_BASIC.CURRENCY                                      AS CURRENCY,
   OPEN_SO_BASIC.SOLD_TO_PARTY                                 AS SOLD_TO_PARTY,
+  0 AS CUSTOMER_NAME,
   OPEN_SO_BASIC.ROUTE                                         AS ROUTE,
   OPEN_SO_BASIC.DELIVERY_PRIORITY                             AS DELIVERY_PRIORITY,
   SALES_PP_X.MRP_CONTROLLER                                   AS MRP_CONTROLLER,
@@ -310,7 +328,7 @@ DROP VIEW VIEW_INV_SAP_BACKLOG_PO;
 DROP TABLE INV_SAP_BACKLOG_PO;
 SELECT * FROM INV_SAP_BACKLOG_PO;
 CREATE TABLE INV_SAP_BACKLOG_PO AS
-SELECT * FROM VIEW_INV_SAP_BACKLOG_PO where PO_ID = '6301433321_0041-5076';
+SELECT * FROM VIEW_INV_SAP_BACKLOG_PO;
 CREATE VIEW VIEW_INV_SAP_BACKLOG_PO AS
 SELECT PO_HIS_LN_OP.PO_ID         AS PO_ID,
   PO_HIS_LN_OP.ID                 AS ID,
@@ -508,10 +526,9 @@ ON ITEM_BASIC.ID = PO_HIS_LN_OP.ID;
 --INVENTORY STATUS
 --VIEW_INV_SAP_BACKLOG_INV
 DROP VIEW VIEW_INV_SAP_BACKLOG_INV;
-SELECT * FROM VIEW_INV_SAP_BACKLOG_INV WHERE ID = '0041-5081_5070';
+SELECT * FROM VIEW_INV_SAP_BACKLOG_INV;
 CREATE VIEW VIEW_INV_SAP_BACKLOG_INV AS
-SELECT INV_BASIC.LAST_REVIEW_DATE AS LAST_REVIEW_DATE,
-  INV_BASIC.ID                    AS ID,
+SELECT INV_BASIC.ID AS ID,
   INV_BASIC.PLANT                 AS PLANT,
   INV_BASIC.MATERIAL              AS MATERIAL,
   ITEM_BASIC.CATALOG_DASH         AS CATALOG_DASH,
@@ -547,101 +564,22 @@ LEFT JOIN
 ON ITEM_BASIC.ID = INV_BASIC.ID;
 
 
+SELECT * FROM DWQ$LIBRARIAN.INV_SAP_INVENTORY_BY_PLANT WHERE MATERIALID = '319308-A01' AND PLANTID = '5070';
+---For Dash Board
+--Inv Record past 12 months
+SELECT MATERIALID,
+PLANTID,
+OH_QTY,
+TO_CHAR(ASOFDATE,'iw')
+FROM INV_SAP_INVENTORY_WKS
+WHERE PLANTID = '5040'
+AND ASOFDATE BETWEEN TO_CHAR(SYSDATE - 192) AND TO_CHAR(SYSDATE) AND MATERIALID = '1756-IB16 A';
 
-
-
-
-
-
-
-
-
----------------------------------------------------------------------------
---Backlog report sql file
----SO detail information
----PO detail information
----PR detail information
----INV detail information
----------------------------------------------------------------------------
-
-----SO detail information
-----Need to add ship-to information and Customer Name
-SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SHIP_SOLD_TO_PARTYID ;
-
-Select * from DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP where SALESDOC = '6501808127'; 
-Select * from DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP where LINECREATEDATE = '15-APR-14' and plant = '1090'; 
-Select * from DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP where MATERIAL = '1756-N2 B' and plant = '5050';
-
-
-SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP WHERE SALES_ORG = '5003'AND PLANT NOT IN ('5040');
-----Ship-To&Sold-To Info
------Sold-To Party
-select * from DWQ$LIBRARIAN.INV_SAP_SHIP_SOLD_TO_PARTYID where SHIP_SOLD_TOPARTY = '91312213';
-
------Ship-To Party
-select * from DWQ$LIBRARIAN.INV_SAP_SHIP_SOLD_TO_PARTYID where SHIP_SOLD_TOPARTY = '91316290';
-
----------------------------------------------
----ADD GAP COL COMMITTED DATE - COMFIRM DATE
-SELECT
-  (MAX_COMMIT_DATE-MAX_CONFIRM_DATE) AS GAP
-FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP;
-
---LINE BLOCK
-SELECT
-  CASE
-    WHEN MAX_COMMIT_DATE IS NULL OR MAX_CONFIRM_DATE IS NULL
-    THEN 'OVERALL BLOCKED/CREDIT BLOCK'
-    ELSE
-    'NO_BLOCK'
-  END LINE_BLOCK
-FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP;
-
----SOLD TO PATY INFORMAITON
-SELECT STPT_S.ID,
-STPT_S.SOLD_TO_PARTY,
-STPT_P.CUSTOMER_NAME
-FROM
-  (SELECT SALESDOC
-    ||'_'
-    || SALESDOCITEM AS ID,
-    SOLD_TO         AS SOLD_TO_PARTY
-  FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
-  )STPT_S
-LEFT JOIN
-  (SELECT SHIP_SOLD_TOPARTY AS SOLD_TO_PARTY,
-    SHIP_TO_PARTY_NAME      AS CUSTOMER_NAME
-  FROM DWQ$LIBRARIAN.INV_SAP_SHIP_SOLD_TO_PARTYID
-  ) STPT_P
-ON STPT_P.SOLD_TO_PARTY = STPT_S.SOLD_TO_PARTY;
-
---DEFAULT Delivery Block
-SELECT 
-  SALE_BK.ID AS ID,
-  SALE_BK.MATERIAL AS MATERIAL,
-  MVKE_BK.D_CHAIN_BLK AS D_CHAIN_BLK
-FROM 
-(
-  SELECT 
-    SALESDOC
-    ||'_'
-    || SALESDOCITEM AS ID,
-    MATERIAL
-    ||'_'
-    || PLANT AS ID1,
-    MATERIAL,
-    PLANT
-  FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
-)SALE_BK
-LEFT JOIN
-(
-SELECT MATERIALID
-  ||'_'
-  ||DIRECT_SHIP_PLANT AS ID,
-  MATERIALID,
-  D_CHAIN_BLK,
-  DIRECT_SHIP_PLANT
-FROM DWQ$LIBRARIAN.INV_SAP_PP_MVKE
-)MVKE_BK
-ON MVKE_BK.ID = SALE_BK.ID1;
-
+SELECT MATERIALID,
+PLANTID,
+OH_QTY,
+ASOFDATE,
+DW_DATE
+FROM INV_SAP_INVENTORY_WKS
+WHERE PLANTID = '5040'
+AND ASOFDATE BETWEEN TO_CHAR(SYSDATE - 192) AND TO_CHAR(SYSDATE) AND MATERIALID = '1756-IB16 A';
