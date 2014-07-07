@@ -1,0 +1,12 @@
+1.每月第一周第一日计算
+Private Sub CommandButton2_Click()
+Dim d As Date
+d = CDate(Year(Now()) & "-" & Month(Now()) & "-01")
+If Weekday(d) = 1 Then
+    ActiveCell = d + 1
+ElseIf Weekday(d) = 2 Then
+    ActiveCell = d
+Else
+    ActiveCell = d + 9 - Weekday(d)
+End If
+End Sub

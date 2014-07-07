@@ -20,7 +20,7 @@ SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_HST@ROCKWELL_DBLINK WHERE PLANTID IN (
 
 SELECT * FROM INV_SAP_SALES_HST WHERE MATERIALID = '100-C23KJ10 C'AND PLANTID = '5040';
 
-select * from INV_SAP_SALES_HST where MATERIALID = '22B-A2P3N104 A' AND PLANTID = '5070';
+select * from INV_SAP_SALES_HST where MATERIALID = '1762-L40BWA C' AND PLANTID = '5140';
 ---Upload History Data
 truncate TABLE STOCK_ITEM_STATUS_BY_BU_WEEK;
 SELECT * FROM STOCK_ITEM_STATUS_BY_BU_WEEK where id = '09-JUN-14_5140_ICM-INTGR COND MONITOR';
@@ -238,150 +238,13 @@ LEFT JOIN
   ON PAST_DUE_OPEN.ID                    = BACKLOG_OPEN.ID
   )BACKLOG_PASTDUE ON BACKLOG_PASTDUE.ID = PP_FC_AVG.ID);
   
-----Remote Version
-CREATE TABLE STOCK_ITEM_PERFORMANCE AS
-  (SELECT 
-      SYSDATE                              AS LAST_REVIEW_DATE,
-      PP_FC_AVG.ID                     AS ID,
-      PP_FC_AVG.MATERIALID                 AS MATERIALID,
-      PP_FC_AVG.PLANTID                    AS PLANTID,
-      PP_FC_AVG.Material_Description       AS Material_Description,
-      PP_FC_AVG.BU                         AS BU,
-      PP_FC_AVG.Procurement_Type           AS Procurement_Type,
-      PP_FC_AVG.MRP_CONTROLLER_ID          AS MRP_CONTROLLER_ID,
-      PP_FC_AVG.MRP_CONTROLLER             AS MRP_CONTROLLER,
-      PP_FC_AVG.MATL_TYPE                  AS MATL_TYPE,
-      PP_FC_AVG.MRP_TYPE                   AS MRP_TYPE,
-      PP_FC_AVG.Stock_Strategy             AS Stock_Strategy,
-      PP_FC_AVG.Unit_Price                 AS Unit_Price,
-      PP_FC_AVG.Reorder_Point              AS Reorder_Point,
-      PP_FC_AVG.Safety_stock_Qty           AS Safety_stock_Qty,
-      PP_FC_AVG.LOT_SIZE                   AS LOT_SIZE,
-      PP_FC_AVG.Min_LOT_SIZE               AS Min_LOT_SIZE,
-      PP_FC_AVG.Rounding_val               AS Rounding_val,
-      PP_FC_AVG.GRT                        AS GRT,
-      PP_FC_AVG.PDT                        AS PDT,
-      PP_FC_AVG.IPT                        AS IPT,
-      PP_FC_AVG.OH_QTY                     AS OH_QTY,
-      NVL(PP_FC_AVG.FC_AVG_WEEK,0)         AS FC_AVG_WEEK,
-      NVL(BACKLOG_PASTDUE.BACKLOG_OPEN,0)  AS BACKLOG_OPEN,
-      NVL(BACKLOG_PASTDUE.PAST_DUE_OPEN,0) AS PAST_DUE_OPEN,
-      0                                 AS Lead_Time,
-      0                                 AS OH$$,
-      0                                 AS MAX_INV,
-      0                                 AS TARGET_INV,
-      0                                 AS Present_Week_Status
-FROM
-  (SELECT PP.ID                    AS ID,
-    PP.MATERIALID                  AS MATERIALID,
-    PP.PLANTID                     AS PLANTID,
-    PP.Material_Description        AS Material_Description,
-    PP.BU                          AS BU,
-    PP.Procurement_Type            AS Procurement_Type,
-    PP.MRP_CONTROLLER_ID           AS MRP_CONTROLLER_ID,
-    PP.MRP_CONTROLLER              AS MRP_CONTROLLER,
-    PP.MATL_TYPE                   AS MATL_TYPE,
-    PP.MRP_TYPE                    AS MRP_TYPE,
-    PP.Stock_Strategy              AS Stock_Strategy,
-    PP.Unit_Price                  AS Unit_Price,
-    PP.Reorder_Point               AS Reorder_Point,
-    PP.Safety_stock_Qty            AS Safety_stock_Qty,
-    PP.LOT_SIZE                    AS LOT_SIZE,
-    PP.Min_LOT_SIZE                AS Min_LOT_SIZE,
-    PP.Rounding_val                AS Rounding_val,
-    PP.GRT                         AS GRT,
-    PP.PDT                         AS PDT,
-    PP.IPT                         AS IPT,
-    PP.OH_QTY                      AS OH_QTY,
-    FC_AVG_WEEK.FC_AVG_WEEK        AS FC_AVG_WEEK
-  FROM
-    (SELECT MATERIALID
-      ||'_'
-      ||PLANTID            AS ID,
-      MATERIALID           AS MATERIALID,
-      PLANTID              AS PLANTID,
-      MAT_DESC             AS Material_Description,
-      PROD_BU              AS BU,
-      PROC_TYPE            AS Procurement_Type,
-      MRP_CONTROLLER_DISPO AS MRP_CONTROLLER_ID,
-      MRP_CONTROLLER       AS MRP_CONTROLLER,
-      MATL_TYPE_MTART      AS MATL_TYPE,
-      MRP_TYPE             AS MRP_TYPE,
-      STRATEGY_GRP         AS Stock_Strategy,
-      UNIT_COST            AS Unit_Price,
-      REORDER_PT           AS Reorder_Point,
-      SAFETY_STK           AS Safety_stock_Qty,
-      LOT_SIZE_DISLS       AS LOT_SIZE,
-      LOT_MIN_BUY          AS Min_LOT_SIZE,
-      LOT_ROUNDING_VALUE   AS Rounding_val,
-      GRT                  AS GRT,
-      PDT                  AS PDT,
-      IPT                  AS IPT,
-      OH_QTY               AS OH_QTY
-    FROM DWQ$LIBRARIAN.INV_SAP_PP_OPTIMIZATION
-    WHERE STRATEGY_GRP   = '40'
-    AND MATL_TYPE_MTART IN ('ZFG','ZTG')
-    AND PLANTID         IN ('5040', '5070', '5100', '5110', '5140', '5200')
-    )PP
-  LEFT JOIN
-    (SELECT MATERIALID
-      ||'_'
-      ||PLANTID                           AS ID,
-      MATERIALID                          AS MATERIALID,
-      PLANTID                             AS PLANTID,
-      CEIL(SUM(PLNMG_PLANNEDQUANTITY)/26) AS FC_AVG_WEEK
-    FROM DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED
-    WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
-    AND PLANTID                                                                        IN ('5040', '5070', '5100', '5110', '5140', '5200')
-    AND VERSBP_VERSION = '55'
-    GROUP BY MATERIALID,
-      MATERIALID
-      ||'_'
-      ||PLANTID,
-      PLANTID,
-      MATERIALID
-    )FC_AVG_WEEK
-  ON PP.ID = FC_AVG_WEEK.ID
-  ) PP_FC_AVG
-LEFT JOIN
-  (SELECT BACKLOG_OPEN.ID           AS ID,
-    BACKLOG_OPEN.OPEN_QTY           AS BACKLOG_OPEN,
-    PAST_DUE_OPEN.PAST_DUE_OPEN_QTY AS PAST_DUE_OPEN
-  FROM
-    (SELECT MATERIAL
-      ||'_'
-      ||PLANT       AS ID,
-      MATERIAL      AS MATERIALID,
-      PLANT         AS PLANTID,
-      SUM(OPEN_QTY) AS OPEN_QTY
-    FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
-    WHERE PLANT IN ('5040', '5070', '5100', '5110', '5140', '5200')
-    AND MAX_COMMIT_DATE < SYSDATE + 90
-    GROUP BY MATERIAL
-      ||'_'
-      ||PLANT,
-      MATERIAL,
-      PLANT
-    )BACKLOG_OPEN
-  LEFT JOIN
-    (SELECT MATERIAL
-      ||'_'
-      ||PLANT       AS ID,
-      MATERIAL      AS MATERIALID,
-      PLANT         AS PLANTID,
-      SUM(OPEN_QTY) AS PAST_DUE_OPEN_QTY
-    FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP
-    WHERE PLANT                  IN ('5040', '5070', '5100', '5110', '5140', '5200')
-    AND MAX_COMMIT_DATE < SYSDATE - 1
-    GROUP BY MATERIAL
-      ||'_'
-      ||PLANT,
-      MATERIAL,
-      PLANT
-    )PAST_DUE_OPEN
-  ON PAST_DUE_OPEN.ID                    = BACKLOG_OPEN.ID
-  )BACKLOG_PASTDUE ON BACKLOG_PASTDUE.ID = PP_FC_AVG.ID);
+  DWQ$LIBRARIAN.INV_SAP_SALES_HST@ROCKWELL_DBLINK
   
+  SELECT *
+    FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+    WHERE PLANT                  IN ('5140')
+    AND MATERIAL = '1762-L40BWA C'
+      
 ---Prepare Data in STOCK_ITEM_STATUS_BY_BU_WEEK
 INSERT INTO STOCK_ITEM_STATUS_BY_BU_WEEK
 (
@@ -1446,4 +1309,141 @@ SELECT DISTINCT * FROM(
     );
 
 
-
+----------------------------------------------------------------------------------
+CREATE TABLE STOCK_ITEM_PERFORMANCE AS
+  (SELECT 
+      SYSDATE                              AS LAST_REVIEW_DATE,
+      PP_FC_AVG.ID                     AS ID,
+      PP_FC_AVG.MATERIALID                 AS MATERIALID,
+      PP_FC_AVG.PLANTID                    AS PLANTID,
+      PP_FC_AVG.Material_Description       AS Material_Description,
+      PP_FC_AVG.BU                         AS BU,
+      PP_FC_AVG.Procurement_Type           AS Procurement_Type,
+      PP_FC_AVG.MRP_CONTROLLER_ID          AS MRP_CONTROLLER_ID,
+      PP_FC_AVG.MRP_CONTROLLER             AS MRP_CONTROLLER,
+      PP_FC_AVG.MATL_TYPE                  AS MATL_TYPE,
+      PP_FC_AVG.MRP_TYPE                   AS MRP_TYPE,
+      PP_FC_AVG.Stock_Strategy             AS Stock_Strategy,
+      PP_FC_AVG.Unit_Price                 AS Unit_Price,
+      PP_FC_AVG.Reorder_Point              AS Reorder_Point,
+      PP_FC_AVG.Safety_stock_Qty           AS Safety_stock_Qty,
+      PP_FC_AVG.LOT_SIZE                   AS LOT_SIZE,
+      PP_FC_AVG.Min_LOT_SIZE               AS Min_LOT_SIZE,
+      PP_FC_AVG.Rounding_val               AS Rounding_val,
+      PP_FC_AVG.GRT                        AS GRT,
+      PP_FC_AVG.PDT                        AS PDT,
+      PP_FC_AVG.IPT                        AS IPT,
+      PP_FC_AVG.OH_QTY                     AS OH_QTY,
+      NVL(PP_FC_AVG.FC_AVG_WEEK,0)         AS FC_AVG_WEEK,
+      NVL(BACKLOG_PASTDUE.BACKLOG_OPEN,0)  AS BACKLOG_OPEN,
+      NVL(BACKLOG_PASTDUE.PAST_DUE_OPEN,0) AS PAST_DUE_OPEN,
+      0                                 AS Lead_Time,
+      0                                 AS OH$$,
+      0                                 AS MAX_INV,
+      0                                 AS TARGET_INV,
+      0                                 AS Present_Week_Status,
+      1          AS  COUNT_KEY
+FROM
+  (SELECT PP.ID                    AS ID,
+    PP.MATERIALID                  AS MATERIALID,
+    PP.PLANTID                     AS PLANTID,
+    PP.Material_Description        AS Material_Description,
+    PP.BU                          AS BU,
+    PP.Procurement_Type            AS Procurement_Type,
+    PP.MRP_CONTROLLER_ID           AS MRP_CONTROLLER_ID,
+    PP.MRP_CONTROLLER              AS MRP_CONTROLLER,
+    PP.MATL_TYPE                   AS MATL_TYPE,
+    PP.MRP_TYPE                    AS MRP_TYPE,
+    PP.Stock_Strategy              AS Stock_Strategy,
+    PP.Unit_Price                  AS Unit_Price,
+    PP.Reorder_Point               AS Reorder_Point,
+    PP.Safety_stock_Qty            AS Safety_stock_Qty,
+    PP.LOT_SIZE                    AS LOT_SIZE,
+    PP.Min_LOT_SIZE                AS Min_LOT_SIZE,
+    PP.Rounding_val                AS Rounding_val,
+    PP.GRT                         AS GRT,
+    PP.PDT                         AS PDT,
+    PP.IPT                         AS IPT,
+    PP.OH_QTY                      AS OH_QTY,
+    FC_AVG_WEEK.FC_AVG_WEEK        AS FC_AVG_WEEK
+  FROM
+    (SELECT MATERIALID
+      ||'_'
+      ||PLANTID            AS ID,
+      MATERIALID           AS MATERIALID,
+      PLANTID              AS PLANTID,
+      MAT_DESC             AS Material_Description,
+      PROD_BU              AS BU,
+      PROC_TYPE            AS Procurement_Type,
+      MRP_CONTROLLER_DISPO AS MRP_CONTROLLER_ID,
+      MRP_CONTROLLER       AS MRP_CONTROLLER,
+      MATL_TYPE_MTART      AS MATL_TYPE,
+      MRP_TYPE             AS MRP_TYPE,
+      STRATEGY_GRP         AS Stock_Strategy,
+      UNIT_COST            AS Unit_Price,
+      REORDER_PT           AS Reorder_Point,
+      SAFETY_STK           AS Safety_stock_Qty,
+      LOT_SIZE_DISLS       AS LOT_SIZE,
+      LOT_MIN_BUY          AS Min_LOT_SIZE,
+      LOT_ROUNDING_VALUE   AS Rounding_val,
+      GRT                  AS GRT,
+      PDT                  AS PDT,
+      IPT                  AS IPT,
+      OH_QTY               AS OH_QTY
+    FROM INV_SAP_PP_OPTIMIZATION
+    WHERE STRATEGY_GRP   = '40'
+    AND MATL_TYPE_MTART IN ('ZFG','ZTG')
+    AND PLANTID         IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    )PP
+  LEFT JOIN
+    (SELECT MATERIALID
+      ||'_'
+      ||PLANTID                           AS ID,
+      MATERIALID                          AS MATERIALID,
+      PLANTID                             AS PLANTID,
+      CEIL(SUM(PLNMG_PLANNEDQUANTITY)/26) AS FC_AVG_WEEK
+    FROM INV_SAP_PP_FRCST_PBIM_PBED
+    WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
+    AND PLANTID                                                                        IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND VERSBP_VERSION = '55'
+    GROUP BY MATERIALID,
+      MATERIALID
+      ||'_'
+      ||PLANTID,
+      PLANTID,
+      MATERIALID
+    )FC_AVG_WEEK
+  ON PP.ID = FC_AVG_WEEK.ID
+  ) PP_FC_AVG
+LEFT JOIN
+  (SELECT BACKLOG_OPEN.ID           AS ID,
+    BACKLOG_OPEN.OPEN_QTY           AS BACKLOG_OPEN,
+    PAST_DUE_OPEN.PAST_DUE_OPEN_QTY AS PAST_DUE_OPEN
+  FROM
+    (SELECT MATERIAL
+      ||'_'
+      ||PLANT       AS ID,
+      MATERIAL      AS MATERIALID,
+      PLANT         AS PLANTID,
+      SUM(OPEN_QTY) AS OPEN_QTY
+    FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+    WHERE PLANT                  IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND MAX_REQUEST_DATE < SYSDATE + 90 AND SALESDOCTYPE IN ('ZOR1','ZOR5')
+    AND OPEN_QTY > 0
+    GROUP BY MATERIAL, PLANT
+    )BACKLOG_OPEN
+  LEFT JOIN
+    (SELECT MATERIAL
+      ||'_'
+      ||PLANT       AS ID,
+      MATERIAL      AS MATERIALID,
+      PLANT         AS PLANTID,
+      SUM(OPEN_QTY) AS PAST_DUE_OPEN_QTY
+    FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+    WHERE PLANT                  IN ('5040', '5070', '5100', '5110', '5140', '5200')
+    AND MAX_COMMIT_DATE < SYSDATE - 1 AND SALESDOCTYPE IN ('ZOR1','ZOR5')
+    AND OPEN_QTY > 0
+    GROUP BY MATERIAL, PLANT
+    )PAST_DUE_OPEN
+  ON PAST_DUE_OPEN.ID                    = BACKLOG_OPEN.ID
+  )BACKLOG_PASTDUE ON BACKLOG_PASTDUE.ID = PP_FC_AVG.ID)

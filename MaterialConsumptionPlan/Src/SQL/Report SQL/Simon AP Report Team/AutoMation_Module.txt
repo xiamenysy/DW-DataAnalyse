@@ -1,0 +1,291 @@
+Sub Auto_Open()
+    'Call Run_Inv_Cls
+    'Call SaveAsSelectedSheets
+    'Call Exit_Excel
+End Sub
+
+Private Sub Run_Inv_Cls()
+'SQL Input Data Process Declaration
+    Dim OraOpen As Boolean
+    Dim conn As Object
+    Dim rst_query_report As Object
+    Dim result_number
+    Dim sql_fetch_cls_data As String
+
+   'GENERATE REPORT
+    'Set query material
+    sql_fetch_cls_data = Temp.Cells(2, 1)
+    
+   'Clear the report data
+    Sheets("INV_Cls_Report").Range("2:65536").ClearContents
+    'Debug.Print sql_query
+     'Set Connection and recordset
+    Set conn = CreateObject("ADODB.Connection")
+    Set rst_query_report = CreateObject("ADODB.Recordset")
+    
+    'Open Database
+    conn.Open "Provider = msdaora; Data Source = data_anlyse ; User Id = system; Password = hmy123456;"
+    OraOpen = True
+    conn.CursorLocation = 3
+    
+    'Obtain recordset
+    Set rst_query_report = conn.Execute(sql_fetch_cls_data)
+    
+    result_number = rst_query_report.RecordCount
+    'Put data to Temp sheet
+    If rst_query_report.RecordCount > 0 Then
+        'Read Data to Excel
+        INV_Cls_Report.Range("A2").CopyFromRecordset rst_query_report
+    End If
+    
+    ' Database need to Close and set null
+    rst_query_report.Close
+    conn.Close
+    Set rst_query_report = Nothing
+    Set conn = Nothing
+End Sub
+
+Sub SaveAsSelectedSheets()
+Dim NewBookName As String
+NewBookName = "C:\My Work Space Ra Files\Reports Collections\AutoMation Testing\5140_Inventory_Classifications_Report" & Replace(Format(Date, "YYYY-MM-DD"), "-", "") & ".xlsx"
+Debug.Print NewBookName
+Workbooks("5140 Inventory Classifications Report.xlsb").Worksheets(Array(1, 2)).Copy
+Application.DisplayAlerts = False
+ActiveWorkbook.SaveAs NewBookName
+Application.DisplayAlerts = True
+ActiveWorkbook.Close
+End Sub
+
+Sub Exit_Excel()
+Application.DisplayAlerts = False
+Workbooks("5140 Inventory Classifications Report.xlsb").Close Savechanges:=False
+Application.Quit
+Application.DisplayAlerts = True
+End Sub
+
+Sub SendWithLotus()
+    Dim noSession As Object, noDatabase As Object
+    Dim noDocument As Object, noAttachment As Object
+    Dim FileSelf As String
+    Dim i As Long
+    Const EMBED_ATTACHMENT = 1454
+    
+    'Mail Title
+    Const stSubject As String = "For Lotus VBA Programming Test only"
+    Dim stMsg As String
+    
+    'Attachment
+    FileSelf = ThisWorkbook.Path + "\" + ThisWorkbook.Name
+    Debug.Print FileSelf
+    stMsg = "Bst & Rgds" & vbCrLf & _
+         Application.UserName & vbCrLf & _
+                                vbCrLf & _
+        "**************************************************************************" & vbCrLf & _
+        "(This's an automated e-mail notification, please do not reply this message.)"
+            
+    Dim vaRecipient As Variant
+    Dim sTemp As String
+    Dim arrItem(0 To 100) As String
+    Dim maillist
+    
+    'Remove blank cells
+    For i = 0 To 99
+        source_part = Sheets("MailList").Cells(i + 1, 1)
+        arrItem(i) = source_part
+    Next i
+    
+     'Remove Blank Item
+    sTemp = Join(arrItem)
+    sTemp = Trim(sTemp)
+    maillist = Split(sTemp)
+    
+    'vaRecipient = VBA.Array("mhuang1@ra.rockwell.com", "huangmoyue@163.com", "huangmoyue@gmail.com")
+    vaRecipient = maillist
+    'Insert Lotus Notes COM object.
+    Set noSession = CreateObject("Notes.NotesSession")
+    Set noDatabase = noSession.GetDatabase("", "")
+    If noDatabase.IsOpen = False Then noDatabase.OPENMAIL
+    Set noDocument = noDatabase.CreateDocument
+    Set noAttachment = noDocument.CreateRichTextItem("Body1")
+    noAttachment.EmbedObject EMBED_ATTACHMENT, "", FileSelf
+    
+    With noDocument
+        .Form = "Memo"
+        .SendTo = vaRecipient
+        .Subject = stSubject
+        .Body = stMsg
+        .SaveMessageOnSend = True
+        .PostedDate = Now()
+        .Send 0, vaRecipient
+    End With
+    
+    Set noDocument = Nothing
+    Set noDatabase = Nothing
+    Set noSession = Nothing
+    AppActivate "Microsoft Excel"
+    MsgBox "This file be sent", vbInformation
+End Sub
+
+
+
+--------
+Private Sub Workbook_Open()
+    'Call Run_Inv_Cls
+    Call SendWithLotusAndShareFolder
+    'SaveAsSelectedSheets
+    Call Exit_Excel
+End Sub
+
+
+
+
+-----7/5/2014-----Update
+Sub Auto_Open()
+    'Call Run_Inv_Cls
+    'Call SendWithLotusAndShareFolder
+    'SaveAsSelectedSheets
+    'Call Exit_Excel
+End Sub
+
+Private Sub Run_Inv_Cls()
+'SQL Input Data Process Declaration
+    Dim OraOpen As Boolean
+    Dim conn As Object
+    Dim rst_query_report As Object
+    Dim result_number
+    Dim sql_fetch_cls_data As String
+
+   'GENERATE REPORT
+    'Set query material
+    sql_fetch_cls_data = Temp.Cells(2, 1)
+    
+   'Clear the report data
+    Sheets("INV_Cls_Report").Range("2:65536").ClearContents
+    'Debug.Print sql_query
+     'Set Connection and recordset
+    Set conn = CreateObject("ADODB.Connection")
+    Set rst_query_report = CreateObject("ADODB.Recordset")
+    
+    'Open Database
+    conn.Open "Provider = msdaora; Data Source = data_anlyse ; User Id = system; Password = hmy123456;"
+    OraOpen = True
+    conn.CursorLocation = 3
+    
+    'Obtain recordset
+    Set rst_query_report = conn.Execute(sql_fetch_cls_data)
+    
+    result_number = rst_query_report.RecordCount
+    'Put data to Temp sheet
+    If rst_query_report.RecordCount > 0 Then
+        'Read Data to Excel
+        INV_Cls_Report.Range("A2").CopyFromRecordset rst_query_report
+    End If
+    
+    ' Database need to Close and set null
+    rst_query_report.Close
+    conn.Close
+    Set rst_query_report = Nothing
+    Set conn = Nothing
+End Sub
+
+Sub SaveAsSelectedSheets()
+Dim NewBookName As String
+NewBookName = "C:\My Work Space Ra Files\Reports Collections\AutoMation Testing\5140_Inventory_Classifications_Report" & Replace(Format(Date, "YYYY-MM-DD"), "-", "") & ".xlsx"
+Debug.Print NewBookName
+Workbooks("5140 Inventory Classifications Report.xlsb").Worksheets(Array(1, 2)).Copy
+Application.DisplayAlerts = False
+ActiveWorkbook.SaveAs NewBookName
+Application.DisplayAlerts = True
+ActiveWorkbook.Close
+End Sub
+
+Sub Exit_Excel()
+Application.DisplayAlerts = False
+'Workbooks("5140 Inventory Classifications Report.xlsb").Close Savechanges:=False
+Application.Quit
+
+End Sub
+
+Sub SendWithLotusAndShareFolder()
+    'Save as in share folder
+    Dim NewBookName As String
+    NewBookName = "\\apsgtuafile001\APR Logistics DW\AP Planning Shared folder\5140_Inventory_Classifications_Report" & Replace(Format(Date, "YYYY-MM-DD"), "-", "") & ".xlsx"
+    Debug.Print NewBookName
+    Workbooks("5140 Inventory Classifications Report.xlsb").Worksheets(Array(1, 2)).Copy
+    Application.DisplayAlerts = False
+    ActiveWorkbook.SaveAs NewBookName
+    Application.DisplayAlerts = True
+    
+    Dim noSession As Object, noDatabase As Object
+    Dim noDocument As Object, noAttachment As Object
+    Dim FileSelf As String
+    Dim i As Long
+    Const EMBED_ATTACHMENT = 1454
+    
+    'Mail Title
+    Dim stSubject As String
+    Dim stMsg As String
+    
+    'Title
+    stSubject = "5140 Inventory Classifications Report" & Replace(Format(Date, "YYYY-MM-DD"), "-", "")
+    
+    'Attachment
+    FileSelf = ActiveWorkbook.Path + "\" + ActiveWorkbook.Name
+    
+    'Mail Body
+    stMsg = "Hi All:" & vbCrLf & _
+            "Please find the attached file for the 5140 Inventory Classifications Report as of today." & vbCrLf & _
+            "Bst & Rgds" & vbCrLf & _
+            "Marlon Moyue Huang" & vbCrLf & _
+            "Rockwell Automation" & vbCrLf & _
+            "mhuang1@ra.rockwell.com" & vbCrLf & _
+            "VOIP:25817" & vbCrLf & _
+            "phone：18205961201" & vbCrLf & _
+                vbCrLf & _
+        "**************************************************************************" & vbCrLf & _
+        "(This's an automated e-mail notification, please do not reply this message.)"
+            
+    Dim vaRecipient As Variant
+    Dim sTemp As String
+    Dim arrItem(0 To 100) As String
+    Dim maillist
+    
+    'Remove blank cells
+    For i = 0 To 99
+        source_part = Workbooks("5140 Inventory Classifications Report.xlsb").Sheets("MailList").Cells(i + 1, 1)
+        arrItem(i) = source_part
+    Next i
+    
+     'Remove Blank Item
+    sTemp = Join(arrItem)
+    sTemp = Trim(sTemp)
+    maillist = Split(sTemp)
+    
+    'vaRecipient = VBA.Array("mhuang1@ra.rockwell.com", "huangmoyue@163.com", "huangmoyue@gmail.com")
+    vaRecipient = maillist
+    'Insert Lotus Notes COM object.
+    Set noSession = CreateObject("Notes.NotesSession")
+    Set noDatabase = noSession.GetDatabase("", "")
+    If noDatabase.IsOpen = False Then noDatabase.OPENMAIL
+    Set noDocument = noDatabase.CreateDocument
+    Set noAttachment = noDocument.CreateRichTextItem("Body1")
+    noAttachment.EmbedObject EMBED_ATTACHMENT, "", FileSelf
+    
+    With noDocument
+        .Form = "Memo"
+        .SendTo = vaRecipient
+        .Subject = stSubject
+        .Body = stMsg
+        .SaveMessageOnSend = True
+        .PostedDate = Now()
+        .Send 0, vaRecipient
+    End With
+    
+    Set noDocument = Nothing
+    Set noDatabase = Nothing
+    Set noSession = Nothing
+    Set noAttachment = Nothing
+    
+    ActiveWorkbook.Close
+End Sub
+

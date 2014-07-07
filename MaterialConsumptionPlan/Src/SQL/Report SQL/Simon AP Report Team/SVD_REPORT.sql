@@ -224,6 +224,7 @@ SELECT SPPX_FC_TRIN_OPEN_NOCM.ID                                                
   SPPX_FC_TRIN_OPEN_NOCM.BU                                                                                                            AS BU,
   NVL(SPPX_FC_TRIN_OPEN_NOCM.LEAD_TIME,0)                                                                                              AS LEAD_TIME,
   SPPX_FC_TRIN_OPEN_NOCM.STRATEGY_GRP                                                                                                  AS STRATEGY_GRP,
+  SPPX_FC_TRIN_OPEN_NOCM.MRP_TYPE                                                                                                       AS MRP_TYPE,  
   NVL(SPPX_FC_TRIN_OPEN_NOCM.SAFETY_STOCK,0)                                                                                           AS SAFETY_STOCK,
   NVL(SPPX_FC_TRIN_OPEN_NOCM.AVG13_USAGE_QTY,0)                                                                                        AS AVG13_USAGE_QTY,
   NVL(SPPX_FC_TRIN_OPEN_NOCM.FC_AVG13_WEEK_QTY,0)                                                                                      AS FC_AVG13_WEEK_QTY,
@@ -245,6 +246,7 @@ FROM
     SPPX_FC_TRIN_OPEN.VENDOR,
     SPPX_FC_TRIN_OPEN.BU,
     SPPX_FC_TRIN_OPEN.STRATEGY_GRP,
+    SPPX_FC_TRIN_OPEN.MRP_TYPE,
     SPPX_FC_TRIN_OPEN.SAFETY_STOCK,
     SPPX_FC_TRIN_OPEN.AVG13_USAGE_QTY,
     SPPX_FC_TRIN_OPEN.LEAD_TIME,
@@ -262,6 +264,7 @@ FROM
       SPPX_FC_TRIN.VENDOR,
       SPPX_FC_TRIN.BU,
       SPPX_FC_TRIN.STRATEGY_GRP,
+      SPPX_FC_TRIN.MRP_TYPE,
       SPPX_FC_TRIN.SAFETY_STOCK,
       SPPX_FC_TRIN.AVG13_USAGE_QTY,
       SPPX_FC_TRIN.LEAD_TIME,
@@ -278,6 +281,7 @@ FROM
         PPX_FC.VENDOR,
         PPX_FC.BU,
         PPX_FC.STRATEGY_GRP,
+        PPX_FC.MRP_TYPE,
         PPX_FC.SAFETY_STOCK,
         PPX_FC.AVG13_USAGE_QTY,
         PPX_FC.LEAD_TIME,
@@ -293,6 +297,7 @@ FROM
           SALES_PP_X.VENDOR,
           SALES_PP_X.BU,
           SALES_PP_X.STRATEGY_GRP,
+          SALES_PP_X.MRP_TYPE,
           SALES_PP_X.SAFETY_STOCK,
           SALES_PP_X.AVG13_USAGE_QTY,
           SALES_PP_X.LEAD_TIME,
@@ -307,6 +312,7 @@ FROM
             SAFETY_STOCK,
             OH_QTY,
             STRATEGY_GRP,
+            MRP_TYPE,
             SUBSTR(VENDOR_KEY,0,4) AS VENDOR,
             SUBSTR(PROD_BU,0,3)    AS BU,
             AVG13_USAGE_QTY,
@@ -550,3 +556,6 @@ FROM
     PLANT,
     LEAD_TIME
   );
+  
+
+
