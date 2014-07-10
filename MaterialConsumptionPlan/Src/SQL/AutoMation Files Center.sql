@@ -10,6 +10,7 @@
 		SERVICE_NAME: APAFC
 		HOST: APCNXMNGYKG422
 		PORT: 1523
+		PW：apafc198617
 		
 2. Oracle Job Setup
 	2.1 Job Name: Job_Daily_INV_PP_OPT
