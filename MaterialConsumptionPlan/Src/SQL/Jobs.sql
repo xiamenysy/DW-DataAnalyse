@@ -1085,3 +1085,8 @@ WHERE REFERENCE_DOC_TRIM IN
 AND CREATED_ON_DATE BETWEEN TO_CHAR(SYSDATE - 7) AND TO_CHAR(SYSDATE);
 
 ---------------------------------------------------REPORTS VIEWS--------------------------------------------------------
+SELECT * FROM v$parameter WHERE name = 'nls_date_language';
+
+
+SELECT * FROM INV_SAP_SALES_HST WHERE LINECREATIONDATE < SYSDATE - 300 AND PLANTID = '5040'
+
