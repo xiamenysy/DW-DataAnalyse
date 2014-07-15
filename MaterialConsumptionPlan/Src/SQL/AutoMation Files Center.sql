@@ -61,7 +61,7 @@
 2. Oracle Job Setup
 	2.1 Job Name: Job_Daily_INV_PP_OPT
 		Job Time: 3:30 AM
-		Job Repeat Frequency: Daily
+		Job Repeat Frequency: Daily ? Two days better?
 		Job Procedure:
 		DECLARE
 		  DROP_TABLE_PP_OPTIMIZATION   VARCHAR2(1000);
@@ -90,7 +90,7 @@
 		BEGIN
 		  DROP_TABLE_OPEN_SALES   := 'Drop table INV_SAP_SALES_VBAK_VBAP_VBUP';
 		  CREATE_TABLE_OPEN_SALES := 'CREATE TABLE INV_SAP_SALES_VBAK_VBAP_VBUP AS
-			SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DW_DBLINK WHERE PLANT IN ('||5040||', '||5050||', '||5100||', '||5110||', '||5120||', '||5160||', '||5190||', '||5200||','||5070||','||5140||')';
+			SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DW_DBLINK';
 		  EXECUTE IMMEDIATE DROP_TABLE_OPEN_SALES;
 		  EXECUTE IMMEDIATE CREATE_TABLE_OPEN_SALES;
 		END;
@@ -98,7 +98,7 @@
 		Job Initialization: 
 		Drop table INV_SAP_SALES_VBAK_VBAP_VBUP;
 		CREATE TABLE INV_SAP_SALES_VBAK_VBAP_VBUP AS
-		SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DW_DBLINK WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
+		SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_VBAK_VBAP_VBUP@ROCKWELL_DW_DBLINK;
 
 	2.3 Job Name: Job_Daily_INV_PP_FCST
 		Job Time: 5:00 AM
@@ -260,7 +260,7 @@
 		CREATE TABLE INV_SAP_MATERIAL_CATALOG AS SELECT * FROM DWQ$LIBRARIAN.INV_SAP_MATERIAL_CATALOG@ROCKWELL_DW_DBLINK;
 
 		DROP TABLE INV_SAP_NODASH_MAT_CATA
-		CREATE TABLE INV_SAP_NODASH_MAT_CATA AS SELECT * FROM INV_SAP_MATERIAL_CATALOG
+		CREATE TABLE INV_SAP_NODASH_MAT_CATA AS SELECT * FROM INV_SAP_MATERIAL_CATALOG;
 		DECLARE
 		  CURSOR cur
 		  IS
@@ -285,10 +285,93 @@
 		  COMMIT;
 		END;
 		
+	2.11 Job Name: Job_Monthly_INV_SHIPSOLD
+		Job Time: Every month 9th 23:00 
+		Job Repeat Frequency: Monthly
+		Job Procedure:
+		DROP TABLE INV_SAP_SHIP_SOLD_TO_PARTYID;
+		CREATE TABLE INV_SAP_SHIP_SOLD_TO_PARTYID AS
+		SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SHIP_SOLD_TO_PARTYID@ROCKWELL_DW_DBLINK;
 		
+		DECLARE
+		  DROP_TABLE_INV_SHIPSOLD  VARCHAR2(1000);
+      CREATE_TABLE_INV_SHIPSOLD_DW  VARCHAR2(1000);
+		  CREATE_TABLE_INV_SHIPSOLD_LO  VARCHAR2(1000);
+      TRUN_INV_SHIP_SOLD  VARCHAR2(1000);
+      INSERT_INV_SHIPSOLD_A  VARCHAR2(1000);
+      INSERT_INV_SHIPSOLD_B  VARCHAR2(1000);
+		BEGIN
+		  DROP_TABLE_INV_SHIPSOLD   := 'Drop table INV_SAP_SHIP_SOLD_TO_PARTYID';
+		  CREATE_TABLE_INV_SHIPSOLD_DW := 'CREATE TABLE INV_SAP_SHIP_SOLD_TO_PARTYID AS
+      SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SHIP_SOLD_TO_PARTYID@ROCKWELL_DW_DBLINK';
+      CREATE_TABLE_INV_SHIPSOLD_LO := 'CREATE TABLE INV_SAP_SHIP_SOLD_TO_PARTYID AS
+      SELECT * FROM SYSTEM.INV_SAP_SHIP_SOLD_TO_PARTYID@ROCKWELL_LOCAL_BK';
+      TRUN_INV_SHIP_SOLD := 'TRUNCATE TABLE INV_SAP_SHIP_SOLD_TO';
+      INSERT_INV_SHIPSOLD_A := 'INSERT INTO INV_SAP_SHIP_SOLD_TO
+          SELECT SHIP_SOLD_TOPARTY,
+          SHIP_TO_PARTY_NAME,
+          SHIP_TO_CITY,
+          SHIP_TO_POSTAL_CODE,
+          SHIP_TO_COUNTRY
+        FROM INV_SAP_SHIP_SOLD_TO_PARTYID';
+      INSERT_INV_SHIPSOLD_B := 'INSERT INTO INV_SAP_SHIP_SOLD_TO 
+        SELECT 
+        SHIP_SOLD_TOPARTY,
+        SOLD_TO_PARTY_NAME,
+        SOLD_TO_CITY,
+        SOLD_TO_POSTAL_CODE,
+        SOLD_TO_COUNTRY
+        FROM INV_SAP_SHIP_SOLD_TO_PARTYID WHERE SHIP_TO_PARTY_NAME IS NULL';
+		  EXECUTE IMMEDIATE DROP_TABLE_INV_SHIPSOLD;
+		  --EXECUTE IMMEDIATE CREATE_TABLE_INV_SHIPSOLD_DW;
+      EXECUTE IMMEDIATE CREATE_TABLE_INV_SHIPSOLD_LO;
+      EXECUTE IMMEDIATE TRUN_INV_SHIP_SOLD;
+      EXECUTE IMMEDIATE INSERT_INV_SHIPSOLD_A;
+      EXECUTE IMMEDIATE INSERT_INV_SHIPSOLD_B;
+		END;
+    
+
+	2.12 Job Name: Job_Daily_PP_TABLE
+		Job Time: 7:00 AM
+		Job Repeat Frequency: Daily
+		Job Procedure:
+		DROP TABLE INV_SAP_PP_OPT_X;
+		CREATE TABLE INV_SAP_PP_OPT_X AS
+		SELECT * FROM VIEW_INV_SAP_PP_OPT_X;
 		
+		DECLARE
+		  DROP_TABLE_INV_PP_TABLE  VARCHAR2(1000);
+		  CREATE_TABLE_INV_PP_TABLE  VARCHAR2(1000);
+		BEGIN
+		  DROP_TABLE_INV_PP_TABLE   := 'Drop table INV_SAP_PP_OPT_X';
+		  CREATE_TABLE_INV_PP_TABLE := 'CREATE TABLE INV_SAP_PP_OPT_X AS
+      SELECT * FROM VIEW_INV_SAP_PP_OPT_X';
+		  EXECUTE IMMEDIATE DROP_TABLE_INV_PP_TABLED;
+		  EXECUTE IMMEDIATE CREATE_TABLE_INV_PP_TABLE;
+		END;
+    
+  2.13 Job Name: Job_Monthly_PLANT_SOG
+		Job Time: Every Month Last week Sat
+		Job Repeat Frequency: Monthly
+		Job Procedure:
+		DROP TABLE INV_SAP_PLANT_SOG;
+		CREATE TABLE INV_SAP_PLANT_SOG AS
+		SELECT DISTINCT PLANT, SALES_ORG FROM INV_SAP_SALES_VBAK_VBAP_VBUP;
 		
-		
+		DECLARE
+		  DROP_TABLE_INV_PLANT_SOG  VARCHAR2(1000);
+		  CREATE_TABLE_INV_PLANT_SOG  VARCHAR2(1000);
+		BEGIN
+		  DROP_TABLE_INV_PLANT_SOG   := 'Drop table INV_SAP_PLANT_SOG';
+		  CREATE_TABLE_INV_PLANT_SOG := 'CREATE TABLE INV_SAP_PLANT_SOG AS
+      SELECT DISTINCT PLANT, SALES_ORG FROM INV_SAP_SALES_VBAK_VBAP_VBUP';
+		  EXECUTE IMMEDIATE DROP_TABLE_INV_PLANT_SOG;
+		  EXECUTE IMMEDIATE CREATE_TABLE_INV_PLANT_SOG;
+		END;
+
+
+
+
 
 3. Oracle View Setup		
 	3.1 X CURRENT ITEM VIEW
@@ -837,15 +920,45 @@
 		  ON ITEM_X.ID = PP_BASIC.ID
 		  );
 		  
-
-
-
-
-
-
-
-
-
+    3.4 
+    DROP VIEW VIEW_INV_SAP_OPEN_SO;
+    SELECT * FROM VIEW_INV_SAP_OPEN_SO WHERE SO_ID = '6501783979_12';
+    CREATE TABLE VIEW_INV_SAP_OPEN_SO AS
+    SELECT SALESDOC
+      ||'_'
+      || SALESDOCITEM AS SO_ID,
+      MATERIAL
+      ||'_'
+      || PLANT              AS ID,
+      SALESDOC              AS SALES_DOC,
+      SALESDOCITEM          AS LINE_NUM,
+      MATERIAL              AS MATERIAL,
+      PLANT                 AS PLANT,
+      SALES_ORG             AS SALES_ORG,
+      LINECREATEDATE        AS LINE_CREATED_DATE,
+      SUBSTR(PRODHIER,0,3)  AS BU,
+      ORDERQTY              AS ORDER_QTY,
+      OPEN_QTY              AS OPEN_QTY,
+      PROFITCENTER          AS PROFIT_CENTER,
+      SALESPRICE            AS SALES_PRICE,
+      CURRENCY              AS CURRENCY,
+      MAX_COMMIT_DATE       AS COMMITTED_DATE,
+      MAX_CONFIRM_DATE      AS CONFIRM_DATE,
+      SOLD_TO               AS SOLD_TO_PARTY,
+      DELIVSTATUS           AS DELIVERY_STATUS,
+      OVERALLDELIVSTATSU    AS OVER_ALL_DELIVERY_STATUS,
+      SALESDOCTYPE          AS SALE_DOC_TYPE,
+      SHIPFROM_VSTEL        AS SHIPPING_POINT,
+      STOCKSTATUS           AS STOCK_STATUS,
+      DELIVPRIO             AS DELIVERY_PRIORITY,
+      LST_ACT_GI_DATE       AS LST_ACT_GI_DATE,
+      LST_DELV_CREATED_DATE AS LST_DELIVERY_CREATE_DATE,
+      EXCHANGE_RATE_TO_USD  AS EXCHANGE_RATE_TO_USD,
+      MAX_REQUEST_DATE      AS REQUIRE_DATE,
+      REQTYPE               AS REQTYPE,
+      ROUTE                 AS ROUTE
+    FROM INV_SAP_SALES_VBAK_VBAP_VBUP;
+    
 
 
 
@@ -884,35 +997,213 @@
       SELECT * FROM STOCK_ITEM_STATUS_BY_BU_WEEK where id = '09-JUN-14_5140_ICM-INTGR COND MONITOR';
       SELECT count(*) FROM STOCK_ITEM_STATUS_BY_BU_WEEK;
       
-      SELECT * FROM STOCK_ITEM_STATUS_BY_ITEM;
       truncate TABLE STOCK_ITEM_STATUS_BY_ITEM;
       SELECT * FROM STOCK_ITEM_STATUS_BY_ITEM where id = '07-JUL-14_5140_LGC-IEC LOGIC COMPONENTS_700-HLT12Z24 A';
       SELECT count(*) FROM STOCK_ITEM_STATUS_BY_ITEM;
 		
 		
 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-
-		
-		
-		
-		
+  4.3 
+      --Backlog Report
+      --Author: Huang Moyue
+      --Date: 7/15/2014
+      4.3.1 Open Sales Order
+      --VIEW_INV_SAP_BACKLOG_SO
+      DROP VIEW VIEW_INV_SAP_BACKLOG_SO;
+      CREATE VIEW VIEW_INV_SAP_BACKLOG_SO AS
+      SELECT SO_PP_BS.ID                  AS ID,
+        SO_PP_BS.PROC_TYPE                AS PROC_TYPE,
+        SO_PP_BS.PLANT                    AS PLANT,
+        SO_PP_BS.SALES_ORG                AS SALES_ORG,
+        SO_PP_BS.SHIPPING_POINT           AS SHIPPING_POINT,
+        SO_PP_BS.SALE_DOC_TYPE            AS SALE_DOC_TYPE,
+        SO_PP_BS.SALES_DOC                AS SALES_DOC,
+        SO_PP_BS.LINE_NUM                 AS LINE_NUM,
+        SO_PP_BS.MATERIAL                 AS MATERIAL,
+        SO_PP_BS.CATALOG_DASH             AS CATALOG_DASH,
+        SO_PP_BS.MAT_DESC                 AS MAT_DESC,
+        SO_PP_BS.MATL_TYPE                AS MATL_TYPE,
+        SO_PP_BS.SAFETY_STOCK             AS SAFETY_STOCK,
+        SO_PP_BS.STRATEGY_GRP             AS STRATEGY_GRP,
+        SO_PP_BS.LEAD_TIME                AS LEAD_TIME,
+        SO_PP_BS.BU                       AS BU,
+        SO_PP_BS.LINE_CREATED_DATE        AS LINE_CREATED_DATE,
+        SO_PP_BS.REQUIRE_DATE             AS REQUIRE_DATE,
+        SO_PP_BS.COMMITTED_DATE           AS COMMITTED_DATE,
+        SO_PP_BS.CONFIRM_DATE             AS CONFIRM_DATE,
+        0                                 AS GAP,
+        SO_PP_BS.LST_ACT_GI_DATE          AS LST_ACT_GI_DATE,
+        SO_PP_BS.LST_DELIVERY_CREATE_DATE AS LST_DELIVERY_CREATE_DATE,
+        SO_PP_BS.ORDER_QTY                AS ORDER_QTY,
+        SO_PP_BS.OPEN_QTY                 AS OPEN_QTY,
+        SO_PP_BS.SHIPPED_QTY              AS SHIPPED_QTY,
+        SO_PP_BS.UNIT                     AS UNIT,
+        SO_PP_BS.PROFIT_CENTER            AS PROFIT_CENTER,
+        SO_PP_BS.SALES_PRICE              AS SALES_PRICE,
+        SO_PP_BS.CURRENCY                 AS CURRENCY,
+        SO_PP_BS.SOLD_TO_PARTY            AS SOLD_TO_PARTY,
+        SOLD_SHIP.SHIP_SOLD_TO_PARTY_NAME AS SHIP_SOLD_TO_PARTY_NAME,
+        SO_PP_BS.ROUTE                    AS ROUTE,
+        SO_PP_BS.DELIVERY_PRIORITY        AS DELIVERY_PRIORITY,
+        SO_PP_BS.MRP_CONTROLLER           AS MRP_CONTROLLER,
+        SO_PP_BS.PURCH_GROUP              AS PURCH_GROUP,
+        SO_PP_BS.MRP_TYPE                 AS MRP_TYPE,
+        SO_PP_BS.DELIVERY_STATUS          AS DELIVERY_STATUS,
+        SO_PP_BS.OVER_ALL_DELIVERY_STATUS AS OVER_ALL_DELIVERY_STATUS,
+        SO_PP_BS.VENDOR_KEY               AS VENDOR_KEY,
+        SO_PP_BS.STOCK_STATUS             AS STOCK_STATUS,
+        SO_PP_BS.REQTYPE                  AS REQTYPE,
+        SO_PP_BS.EXCHANGE_RATE_TO_USD     AS EXCHANGE_RATE_TO_USD
+      FROM
+        (SELECT OPEN_SO_BASIC.ID                             AS ID,
+          SALES_PP_X.PROC_TYPE                               AS PROC_TYPE,
+          OPEN_SO_BASIC.PLANT                                AS PLANT,
+          OPEN_SO_BASIC.SALES_ORG                            AS SALES_ORG,
+          OPEN_SO_BASIC.SHIPPING_POINT                       AS SHIPPING_POINT,
+          OPEN_SO_BASIC.SALE_DOC_TYPE                        AS SALE_DOC_TYPE,
+          OPEN_SO_BASIC.SALES_DOC                            AS SALES_DOC,
+          OPEN_SO_BASIC.LINE_NUM                             AS LINE_NUM,
+          OPEN_SO_BASIC.MATERIAL                             AS MATERIAL,
+          SALES_PP_X.CATALOG_DASH                            AS CATALOG_DASH,
+          SALES_PP_X.MAT_DESC                                AS MAT_DESC,
+          SALES_PP_X.MATL_TYPE                               AS MATL_TYPE,
+          SALES_PP_X.SAFETY_STOCK                            AS SAFETY_STOCK,
+          SALES_PP_X.STRATEGY_GRP                            AS STRATEGY_GRP,
+          SALES_PP_X.LEAD_TIME                               AS LEAD_TIME,
+          OPEN_SO_BASIC.BU                                   AS BU,
+          OPEN_SO_BASIC.LINE_CREATED_DATE                    AS LINE_CREATED_DATE,
+          OPEN_SO_BASIC.REQUIRE_DATE                         AS REQUIRE_DATE,
+          OPEN_SO_BASIC.COMMITTED_DATE                       AS COMMITTED_DATE,
+          OPEN_SO_BASIC.CONFIRM_DATE                         AS CONFIRM_DATE,
+          OPEN_SO_BASIC.LST_ACT_GI_DATE                      AS LST_ACT_GI_DATE,
+          OPEN_SO_BASIC.LST_DELIVERY_CREATE_DATE             AS LST_DELIVERY_CREATE_DATE,
+          OPEN_SO_BASIC.ORDER_QTY                            AS ORDER_QTY,
+          OPEN_SO_BASIC.OPEN_QTY                             AS OPEN_QTY,
+          (OPEN_SO_BASIC.ORDER_QTY - OPEN_SO_BASIC.OPEN_QTY) AS SHIPPED_QTY,
+          SALES_PP_X.UNIT                                    AS UNIT,
+          OPEN_SO_BASIC.PROFIT_CENTER                        AS PROFIT_CENTER,
+          OPEN_SO_BASIC.SALES_PRICE                          AS SALES_PRICE,
+          OPEN_SO_BASIC.CURRENCY                             AS CURRENCY,
+          LPAD(OPEN_SO_BASIC.SOLD_TO_PARTY,10,'0')           AS SOLD_TO_PARTY,
+          OPEN_SO_BASIC.ROUTE                                AS ROUTE,
+          OPEN_SO_BASIC.DELIVERY_PRIORITY                    AS DELIVERY_PRIORITY,
+          SALES_PP_X.MRP_CONTROLLER                          AS MRP_CONTROLLER,
+          SALES_PP_X.PURCH_GROUP                             AS PURCH_GROUP,
+          SALES_PP_X.MRP_TYPE                                AS MRP_TYPE,
+          OPEN_SO_BASIC.DELIVERY_STATUS                      AS DELIVERY_STATUS,
+          OPEN_SO_BASIC.OVER_ALL_DELIVERY_STATUS             AS OVER_ALL_DELIVERY_STATUS,
+          SALES_PP_X.VENDOR_KEY                              AS VENDOR_KEY,
+          OPEN_SO_BASIC.STOCK_STATUS                         AS STOCK_STATUS,
+          OPEN_SO_BASIC.REQTYPE                              AS REQTYPE,
+          OPEN_SO_BASIC.EXCHANGE_RATE_TO_USD                 AS EXCHANGE_RATE_TO_USD
+        FROM
+          (SELECT ID,
+            SALES_DOC,
+            LINE_NUM,
+            MATERIAL,
+            PLANT,
+            SALES_ORG,
+            LINE_CREATED_DATE,
+            BU,
+            ORDER_QTY,
+            OPEN_QTY,
+            PROFIT_CENTER,
+            SALES_PRICE,
+            CURRENCY,
+            COMMITTED_DATE,
+            CONFIRM_DATE,
+            SOLD_TO_PARTY,
+            DELIVERY_STATUS,
+            OVER_ALL_DELIVERY_STATUS,
+            SALE_DOC_TYPE,
+            SHIPPING_POINT,
+            STOCK_STATUS,
+            DELIVERY_PRIORITY,
+            LST_ACT_GI_DATE,
+            LST_DELIVERY_CREATE_DATE,
+            EXCHANGE_RATE_TO_USD,
+            REQUIRE_DATE,
+            REQTYPE,
+            ROUTE
+          FROM VIEW_INV_SAP_OPEN_SO
+          WHERE SALES_ORG IN ('5003','5007')
+          )OPEN_SO_BASIC
+        LEFT JOIN
+          (SELECT ID,
+            CATALOG_DASH,
+            MAT_DESC,
+            SAFETY_STOCK,
+            PROC_TYPE,
+            UNIT,
+            STRATEGY_GRP,
+            MRP_TYPE,
+            VENDOR_KEY,
+            MRP_CONTROLLER,
+            PURCH_GROUP,
+            LEAD_TIME,
+            MATL_TYPE
+          FROM INV_SAP_PP_OPT_X
+          )SALES_PP_X
+        ON SALES_PP_X.ID = OPEN_SO_BASIC.ID
+        )SO_PP_BS
+      LEFT JOIN
+        (SELECT LPAD(SHIP_SOLD_TO_PARTY,10,'0') AS SHIP_SOLD_TO_PARTY,
+          SHIP_SOLD_TO_PARTY_NAME
+        FROM INV_SAP_SHIP_SOLD_TO
+        )SOLD_SHIP
+      ON SO_PP_BS.SOLD_TO_PARTY = SOLD_SHIP.SHIP_SOLD_TO_PARTY;
+    
+      4.3.2 Stock status
+      --VIEW_INV_SAP_BACKLOG_INV
+      DROP VIEW VIEW_INV_SAP_BACKLOG_INV;
+      SELECT * FROM VIEW_INV_SAP_BACKLOG_INV;
+      CREATE VIEW VIEW_INV_SAP_BACKLOG_INV AS
+      SELECT INV_BASIC.ID AS ID,
+        INV_BASIC.PLANT                 AS PLANT,
+        INV_BASIC.MATERIAL              AS MATERIAL,
+        ITEM_BASIC.CATALOG_DASH         AS CATALOG_DASH,
+        ITEM_BASIC.MAT_DESC             AS MAT_DESC,
+        ITEM_BASIC.PROD_BU              AS PROD_BU,
+        ITEM_BASIC.MATL_TYPE            AS MATL_TYPE,
+        ITEM_BASIC.STRATEGY_GRP         AS STRATEGY_GRP,
+        ITEM_BASIC.SAFETY_STOCK         AS SAFETY_STOCK,
+        INV_BASIC.TOTAL_QTY             AS TOTAL_QTY,
+        INV_BASIC.LOCATIONID            AS LOCATION
+      FROM
+        (SELECT MATERIALID
+          ||'_'
+          ||PLANTID     AS ID,
+          MATERIALID    AS MATERIAL,
+          PLANTID       AS PLANT,
+          LOCATIONID    AS LOCATIONID,
+          NVL(OH_QTY,0) AS TOTAL_QTY,
+          ASOFDATE      AS LAST_REVIEW_DATE
+        FROM INV_SAP_INVENTORY_BY_PLANT
+        )INV_BASIC
+      LEFT JOIN
+        (SELECT ID,
+          CATALOG_DASH,
+          MAT_DESC,
+          SAFETY_STOCK,
+          UNIT,
+          STRATEGY_GRP,
+          PROD_BU,
+          MATL_TYPE
+        FROM INV_SAP_PP_OPT_X
+        )ITEM_BASIC
+      ON ITEM_BASIC.ID = INV_BASIC.ID;
+      
+      4.3.3 Open PO
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      

@@ -124,13 +124,15 @@ SELECT SVD_BASIC.ID,
   SVD_BASIC.PRODUCTION_PLANT,
   SVD_BASIC.BU,
   SVD_BASIC.LEAD_TIME,
+  SVD_BASIC.MRP_CONTROLLER,
+  SVD_BASIC.UNIT_COST,
   SVD_BASIC.STRATEGY_GRP,
   SVD_BASIC.SAFETY_STOCK,
   SVD_BASIC.AVG13_USAGE_QTY,
   SVD_BASIC.FC_AVG13_WEEK_QTY,
-  SVD_BASIC.OH_QTY,
-  SVD_BASIC.STOCK_IN_TRANSIT_QTY,
-  SVD_BASIC.TOT_OPEN_QTY,
+  SVD_BASIC.OH_VALUE,
+  SVD_BASIC.TRANSIT_VALUE,
+  SVD_BASIC.TOT_OPEN_VALUE,
   SVD_BASIC.PASS_DUE_QTY,
   SVD_BASIC.LT_OPEN_QTY,
   SVD_BASIC.LT_WEEKS13_OPEN_QTY,
@@ -150,14 +152,16 @@ FROM
     VENDOR,
     BU,
     LEAD_TIME,
+    MRP_CONTROLLER,
+    UNIT_COST,
     STRATEGY_GRP,
     SAFETY_STOCK,
     AVG13_USAGE_QTY,
     FC_AVG13_WEEK_QTY,
     PRODUCTION_PLANT,
-    OH_QTY,
-    STOCK_IN_TRANSIT_QTY,
-    TOT_OPEN_QTY,
+    NVL(OH_QTY*UNIT_COST,0) AS OH_VALUE,
+    NVL(STOCK_IN_TRANSIT_QTY*UNIT_COST,0) AS TRANSIT_VALUE,
+    NVL(TOT_OPEN_QTY*UNIT_COST,0) AS TOT_OPEN_VALUE,
     PASS_DUE_QTY,
     LT_OPEN_QTY,
     LT_WEEKS13_OPEN_QTY,
@@ -212,31 +216,33 @@ DROP TABLE INV_SAP_SVD_REPORT;
 
 SELECT count(*) FROM INV_SAP_SVD_REPORT WHERE TOT_OPEN_QTY <> 0 OR  STOCK_IN_TRANSIT_QTY <> 0 OR OH_QTY <> 0;
 
-
+DROP VIEW VIEW_INV_SAP_SVD_REPORT;
 CREATE TABLE INV_SAP_SVD_REPORT AS 
 SELECT * FROM VIEW_INV_SAP_SVD_REPORT;
 CREATE VIEW VIEW_INV_SAP_SVD_REPORT AS
-SELECT SPPX_FC_TRIN_OPEN_NOCM.ID                                                                                                       AS ID,
-  SPPX_FC_TRIN_OPEN_NOCM.MATERIAL                                                                                                      AS MATERIAL,
-  SPPX_FC_TRIN_OPEN_NOCM.CATALOG_DASH                                                                                                  AS CATALOG_DASH,
-  SPPX_FC_TRIN_OPEN_NOCM.PLANT                                                                                                         AS PLANT,
-  SPPX_FC_TRIN_OPEN_NOCM.VENDOR                                                                                                        AS VENDOR,
-  SPPX_FC_TRIN_OPEN_NOCM.BU                                                                                                            AS BU,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.LEAD_TIME,0)                                                                                              AS LEAD_TIME,
-  SPPX_FC_TRIN_OPEN_NOCM.STRATEGY_GRP                                                                                                  AS STRATEGY_GRP,
-  SPPX_FC_TRIN_OPEN_NOCM.MRP_TYPE                                                                                                       AS MRP_TYPE,  
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.SAFETY_STOCK,0)                                                                                           AS SAFETY_STOCK,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.AVG13_USAGE_QTY,0)                                                                                        AS AVG13_USAGE_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.FC_AVG13_WEEK_QTY,0)                                                                                      AS FC_AVG13_WEEK_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.OH_QTY,0)                                                                                                 AS OH_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.STOCK_IN_TRANSIT_QTY,0)                                                                                   AS STOCK_IN_TRANSIT_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_OPEN_QTY,0)                                                                                           AS TOT_OPEN_QTY,
-  NVL(SO_STAT.PASS_DUE_QTY,0)                                                                                                          AS PASS_DUE_QTY,
-  NVL(SO_STAT.LT_OPEN_QTY,0)                                                                                                           AS LT_OPEN_QTY,
-  NVL(SO_STAT.LT_WEEKS13_OPEN_QTY,0)                                                                                                   AS LT_WEEKS13_OPEN_QTY,
-  NVL(SO_STAT.OUT_WEEKS13_OPEN_QTY,0)                                                                                                  AS OUT_WEEKS13_OPEN_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_NO_COMMITTED_DATE_QTY,0)                                                                            AS TOT_NO_COMMITTED_DATE_QTY,
-  NVL(SPPX_FC_TRIN_OPEN_NOCM.ULTIMATE_SOURCE,0)                                                                                       AS PRODUCTION_PLANT,
+SELECT SPPX_FC_TRIN_OPEN_NOCM.ID                                                                                                         AS ID,
+  SPPX_FC_TRIN_OPEN_NOCM.MATERIAL                                                                                                        AS MATERIAL,
+  SPPX_FC_TRIN_OPEN_NOCM.CATALOG_DASH                                                                                                    AS CATALOG_DASH,
+  SPPX_FC_TRIN_OPEN_NOCM.PLANT                                                                                                           AS PLANT,
+  SPPX_FC_TRIN_OPEN_NOCM.VENDOR                                                                                                          AS VENDOR,
+  SPPX_FC_TRIN_OPEN_NOCM.BU                                                                                                              AS BU,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.LEAD_TIME,0)                                                                                                AS LEAD_TIME,
+  SPPX_FC_TRIN_OPEN_NOCM.STRATEGY_GRP                                                                                                    AS STRATEGY_GRP,
+  SPPX_FC_TRIN_OPEN_NOCM.MRP_TYPE                                                                                                        AS MRP_TYPE,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.SAFETY_STOCK,0)                                                                                             AS SAFETY_STOCK,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.AVG13_USAGE_QTY,0)                                                                                          AS AVG13_USAGE_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.FC_AVG13_WEEK_QTY,0)                                                                                        AS FC_AVG13_WEEK_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.OH_QTY,0)                                                                                                   AS OH_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.UNIT_COST,0)                                                                                                AS UNIT_COST,
+  SPPX_FC_TRIN_OPEN_NOCM.MRP_CONTROLLER AS MRP_CONTROLLER,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.STOCK_IN_TRANSIT_QTY,0)                                                                                     AS STOCK_IN_TRANSIT_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_OPEN_QTY,0)                                                                                             AS TOT_OPEN_QTY,
+  NVL(SO_STAT.PASS_DUE_QTY,0)                                                                                                            AS PASS_DUE_QTY,
+  NVL(SO_STAT.LT_OPEN_QTY,0)                                                                                                             AS LT_OPEN_QTY,
+  NVL(SO_STAT.LT_WEEKS13_OPEN_QTY,0)                                                                                                     AS LT_WEEKS13_OPEN_QTY,
+  NVL(SO_STAT.OUT_WEEKS13_OPEN_QTY,0)                                                                                                    AS OUT_WEEKS13_OPEN_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_NO_COMMITTED_DATE_QTY,0)                                                                                AS TOT_NO_COMMITTED_DATE_QTY,
+  NVL(SPPX_FC_TRIN_OPEN_NOCM.ULTIMATE_SOURCE,0)                                                                                          AS PRODUCTION_PLANT,
   (NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_OPEN_QTY,0)+NVL(SPPX_FC_TRIN_OPEN_NOCM.STOCK_IN_TRANSIT_QTY,0)+ NVL(SPPX_FC_TRIN_OPEN_NOCM.OH_QTY, 0)) AS CHECK_KEY
 FROM
   (SELECT SPPX_FC_TRIN_OPEN.ID,
@@ -252,6 +258,8 @@ FROM
     SPPX_FC_TRIN_OPEN.LEAD_TIME,
     SPPX_FC_TRIN_OPEN.FC_AVG13_WEEK_QTY,
     SPPX_FC_TRIN_OPEN.OH_QTY,
+    SPPX_FC_TRIN_OPEN.UNIT_COST,
+    SPPX_FC_TRIN_OPEN.MRP_CONTROLLER,
     SPPX_FC_TRIN_OPEN.ULTIMATE_SOURCE,
     SPPX_FC_TRIN_OPEN.STOCK_IN_TRANSIT_QTY,
     SPPX_FC_TRIN_OPEN.TOT_OPEN_QTY,
@@ -270,6 +278,8 @@ FROM
       SPPX_FC_TRIN.LEAD_TIME,
       SPPX_FC_TRIN.FC_AVG13_WEEK_QTY,
       SPPX_FC_TRIN.OH_QTY,
+      SPPX_FC_TRIN.UNIT_COST,
+      SPPX_FC_TRIN.MRP_CONTROLLER,
       SPPX_FC_TRIN.ULTIMATE_SOURCE,
       SPPX_FC_TRIN.STOCK_IN_TRANSIT_QTY,
       TOT_OPEN.TOT_OPEN_QTY
@@ -286,6 +296,8 @@ FROM
         PPX_FC.AVG13_USAGE_QTY,
         PPX_FC.LEAD_TIME,
         PPX_FC.FC_AVG13_WEEK_QTY,
+        PPX_FC.UNIT_COST,
+        PPX_FC.MRP_CONTROLLER,
         PPX_FC.OH_QTY,
         PPX_FC.ULTIMATE_SOURCE,
         STOCK_IN_TRAINST.STOCK_IN_TRANSIT_QTY
@@ -301,6 +313,8 @@ FROM
           SALES_PP_X.SAFETY_STOCK,
           SALES_PP_X.AVG13_USAGE_QTY,
           SALES_PP_X.LEAD_TIME,
+          SALES_PP_X.UNIT_COST,
+          SALES_PP_X.MRP_CONTROLLER,
           FC_AVG13_WEEK.FC_AVG13_WEEK_QTY,
           SALES_PP_X.OH_QTY,
           SALES_PP_X.ULTIMATE_SOURCE
@@ -317,6 +331,8 @@ FROM
             SUBSTR(PROD_BU,0,3)    AS BU,
             AVG13_USAGE_QTY,
             LEAD_TIME,
+            UNIT_COST,
+            MRP_CONTROLLER,
             ULTIMATE_SOURCE
           FROM VIEW_INV_SAP_PP_OPT_X
           WHERE MATL_TYPE IN ('ZTG','ZFG')
@@ -371,8 +387,7 @@ FROM
         PLANT,
         NVL(SUM(OPEN_QTY),0) AS TOT_OPEN_QTY
       FROM INV_SAP_SALES_VBAK_VBAP_VBUP
-      GROUP BY 
-        MATERIAL,
+      GROUP BY MATERIAL,
         PLANT
       )TOT_OPEN
     ON TOT_OPEN.ID = SPPX_FC_TRIN.ID
@@ -387,9 +402,8 @@ FROM
       PLANT,
       NVL(SUM(OPEN_QTY),0) AS TOT_NO_COMMITTED_DATE_QTY
     FROM INV_SAP_SALES_VBAK_VBAP_VBUP
-    WHERE MAX_COMMIT_DATE IS NULL 
-    GROUP BY 
-      MATERIAL,
+    WHERE MAX_COMMIT_DATE IS NULL
+    GROUP BY MATERIAL,
       PLANT
     )NO_COMMITTED_DATE
   ON NO_COMMITTED_DATE.ID = SPPX_FC_TRIN_OPEN.ID
@@ -556,6 +570,9 @@ FROM
     PLANT,
     LEAD_TIME
   );
+  
+
+  
   
 
 
