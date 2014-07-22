@@ -191,11 +191,11 @@ FROM
       ||PLANTID                           AS ID,
       MATERIALID                          AS MATERIALID,
       PLANTID                             AS PLANTID,
-      CEIL(SUM(PLNMG_PLANNEDQUANTITY)/26) AS FC_AVG_WEEK
+      CEIL(SUM(PLNMG_PLANNEDQUANTITY)/18) AS FC_AVG_WEEK
     FROM INV_SAP_PP_FRCST_PBIM_PBED
-    WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 182))
+    WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate + 56) AND TO_CHAR(sysdate + 182))
     AND PLANTID                                                                        IN ('5040', '5070', '5100', '5110', '5140', '5200')
-    AND VERSBP_VERSION = '55'
+    AND VERSBP_VERSION = '00'
     GROUP BY MATERIALID,
       MATERIALID
       ||'_'

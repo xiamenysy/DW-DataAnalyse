@@ -10,3 +10,106 @@ Else
     ActiveCell = d + 9 - Weekday(d)
 End If
 End Sub
+
+2. Copy sheet 然后进行整理
+Private Sub CommandButton1_Click()
+
+    Dim paste_number
+    
+    ActiveWorkbook.RefreshAll
+    Application.DisplayAlerts = False
+    Sheets("Weekly_Status_BYItem").Delete
+    Application.DisplayAlerts = True
+
+    Weekly_Status_By_Item_PiotTable.Cells.Select
+    Selection.Copy
+    Sheets.Add After:=Weekly_Status_By_Item_PiotTable
+    ActiveSheet.Name = "Weekly_Status_BYItem"
+    
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Sheets("Weekly_Status_BYItem").Rows("1:3").Select
+    Sheets("Weekly_Status_BYItem").Range("A3").Activate
+    Application.CutCopyMode = False
+    Selection.Delete Shift:=xlUp
+    Sheets("Weekly_Status_BYItem").Rows("1:1").Select
+    Selection.NumberFormat = "m/d/yyyy"
+    Sheets("Weekly_Status_BYItem").Columns("R:R").Select
+    Selection.Delete Shift:=xlToLeft
+    Sheets("Weekly_Status_BYItem").Columns("Z:Z").Select
+    Selection.Delete Shift:=xlToLeft
+    
+    paste_number = ActiveSheet.UsedRange.Rows.Count
+    Debug.Print paste_number
+    Sheets("Weekly_Status_BYItem").Rows(paste_number).Select
+    Selection.Delete Shift:=xlUp
+    Sheets("Weekly_Status_BYItem").Rows(paste_number - 1).Delete
+    Selection.Delete Shift:=xlUp
+
+    Dim week_by_item
+    Dim dict
+    Dim K, V
+    Dim start_plant, start_loc, end_loc
+    
+    week_by_item = ActiveSheet.UsedRange.Rows.Count
+    Set dict = CreateObject("Scripting.Dictionary")
+    
+    For I = 1 To week_by_item
+        If Sheets("Weekly_Status_BYItem").Cells(I, 1) <> "" Then
+            dict.Add Sheets("Weekly_Status_BYItem").Cells(I, 1), I
+            'Debug.Print Sheets("Weekly_Status_BYItem").Cells(i, 1)&"_"& i
+        End If
+    Next I
+    
+    K = dict.keys
+    V = dict.Items
+    For I = 1 To dict.Count - 1
+        start_plant = K(I)
+        start_loc = V(I)
+        If I + 1 = dict.Count Then
+            end_loc = week_by_item - 2
+        Else
+            end_loc = V(I + 1)
+        End If
+        Debug.Print start_plant; start_loc; end_loc; dict.Count
+        For j = start_loc To end_loc - 2
+            Sheets("Weekly_Status_BYItem").Cells(j + 1, 1) = start_plant
+        Next j
+    Next I
+    
+    Sheets("Weekly_Status_BYItem").Range("A1:Y1").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent6
+        .TintAndShade = 0.399975585192419
+        .PatternTintAndShade = 0
+    End With
+    ActiveWindow.Zoom = 85
+
+    Dim result_number_status_bu_rows As Integer
+    Dim result_number_status_bu_cols As Integer
+
+    'Debug.Print Sheets("Week_Status_BU").UsedRange.Rows.Count
+    result_number_status_bu_rows = Sheets("Weekly_Status_BYItem").UsedRange.Rows.Count
+    result_number_status_bu_cols = Sheets("Weekly_Status_BYItem").UsedRange.Columns.Count
+    Debug.Print result_number_status_bu_rows
+    Debug.Print result_number_status_bu_cols
+    'Add Field Name and set up Field Color, Font style
+    For I = 1 To result_number_status_bu_rows
+        For j = 1 To result_number_status_bu_cols
+            If Sheets("Weekly_Status_BYItem").Cells(I, j) = 1 Then
+                Sheets("Weekly_Status_BYItem").Cells(I, j).Interior.ColorIndex = 3
+            ElseIf Sheets("Weekly_Status_BYItem").Cells(I, j) = 2 Then
+                Sheets("Weekly_Status_BYItem").Cells(I, j).Interior.ColorIndex = 45
+            ElseIf Sheets("Weekly_Status_BYItem").Cells(I, j) = 3 Then
+                Sheets("Weekly_Status_BYItem").Cells(I, j).Interior.ColorIndex = 27
+            ElseIf Sheets("Weekly_Status_BYItem").Cells(I, j) = 4 Then
+                Sheets("Weekly_Status_BYItem").Cells(I, j).Interior.ColorIndex = 43
+            ElseIf Sheets("Weekly_Status_BYItem").Cells(I, j) = 5 Then
+                Sheets("Weekly_Status_BYItem").Cells(I, j).Interior.ColorIndex = 13
+            End If
+        Next j
+    Next I
+    
+End Sub
