@@ -1,0 +1,21 @@
+1.Sorting Codes
+    ActiveWorkbook.Worksheets("SVD_Report").AutoFilter.Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("SVD_Report").AutoFilter.Sort.SortFields.Add Key:=Range("L1"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortTextAsNumbers
+    ActiveWorkbook.Worksheets("SVD_Report").AutoFilter.Sort.SortFields.Add Key:=Range("AA1"), SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortTextAsNumbers
+    ActiveWorkbook.Worksheets("SVD_Report").AutoFilter.Sort.SortFields.Add Key:=Range("X1"), SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortTextAsNumbers
+
+    With ActiveWorkbook.Worksheets("SVD_Report").AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+
+2. Run other functions on the another the Excel Files
+Private Sub CommandButton1_Click()
+    Workbooks.Open "C:\My Work Space Ra Files\Reports Collections\SVD\SvD_Report_07182014_test.xlsb"
+    Application.Run "SvD_Report_07182014_test.xlsb!Run_Svd_Report"
+End Sub
+
+Run_Svd_Report on the model 1
