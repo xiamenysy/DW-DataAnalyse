@@ -117,10 +117,13 @@ FROM
 --Clear the table
 CREATE TABLE INV_SAP_RCCP_INDREQ AS 
 SELECT * FROM SYSTEM.INV_SAP_RCCP_INDREQ@ROCKWELL_LOCAL_BK;
-SELECT count(*) FROM INV_SAP_RCCP_INDREQ;
+SELECT * FROM INV_SAP_RCCP_INDREQ;
+CREATE TABLE INV_SAP_RCCP_INDREQ_THU AS 
+SELECT * FROM INV_SAP_RCCP_INDREQ;
 
 DROP TABLE INV_SAP_RCCP_INDREQ;
 TRUNCATE TABLE INV_SAP_RCCP_INDREQ;
+TRUNCATE TABLE INV_SAP_RCCP_INDREQ_THU;
 INSERT INTO INV_SAP_RCCP_INDREQ(
 PLANT,
 MAP_CONTROLLER,
@@ -267,8 +270,8 @@ WHERE UNIT NOT   IN ('IN')
 AND KEY          <> 0
 AND STRATEGY_GRP IN ('Z4','40');
 
-DROP VIEW VIEW_INV_SAP_RCCP;
-CREATE VIEW VIEW_INV_SAP_RCCP AS
+DROP VIEW VIEW_INV_SAP_RCCP_THU;
+CREATE VIEW VIEW_INV_SAP_RCCP_THU AS
 SELECT BS_MCBZ_PO.ID                                                                                                                                                                                                                                                                                                                                                                                                                                AS ID,
   BS_MCBZ_PO.MATERIAL                                                                                                                                                                                                                                                                                                                                                                                                                               AS MATERIAL,
   BS_MCBZ_PO.CATALOG_DASH                                                                                                                                                                                                                                                                                                                                                                                                                           AS CATALOG_DASH,
@@ -596,7 +599,7 @@ FROM
             MIN_INV         AS MIN_INV,
             TARGET_INV      AS TARGET_INV,
             MAX_INV         AS MAX_INV
-          FROM VIEW_INV_SAP_PP_OPT_X
+          FROM INV_SAP_PP_OPT_X
           WHERE PLANT   IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
           AND MATL_TYPE IN ('ZTG','ZFG')
           )RCCP_BASIC_IND
@@ -619,7 +622,7 @@ FROM
             SUM(IND_REQ_WK_10) AS TOT_REQ_WEEK_10,
             SUM(IND_REQ_WK_11) AS TOT_REQ_WEEK_11,
             SUM(IND_REQ_WK_12) AS TOT_REQ_WEEK_12
-          FROM INV_SAP_RCCP_INDREQ
+          FROM INV_SAP_RCCP_INDREQ_THU
           GROUP BY PLANT,
             MATERIAL
           )REQ_MCBZ_TOT
