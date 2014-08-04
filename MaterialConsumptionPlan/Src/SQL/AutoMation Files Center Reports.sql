@@ -293,7 +293,7 @@
                 PURCH_GROUP,
                 LEAD_TIME,
                 MATL_TYPE
-              FROM VIEW_INV_SAP_PP_OPT_X --WHERE ID = 'ESB-SIRC-JQD_5040'
+              FROM INV_SAP_PP_OPT_X --WHERE ID = 'ESB-SIRC-JQD_5040'
               )SALES_PP_X
             ON SALES_PP_X.ID = OPEN_SO_BASIC.ID
             )SO_PP_BS
@@ -428,7 +428,7 @@
       --VIEW_INV_SAP_OPEN_PO
       DROP VIEW VIEW_INV_SAP_BACKLOG_PO;
       SELECT * FROM VIEW_INV_SAP_BACKLOG_PO WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140') AND ID = 'PN-C75741_5200';
-    
+     
       CREATE VIEW VIEW_INV_SAP_BACKLOG_PO AS
       SELECT PO_HIS_LN_OP_ST.ID                     AS ID,
         PO_HIS_LN_OP_ST.PURCHDOCCAT                 AS PROCUREMENT_TYPE,
