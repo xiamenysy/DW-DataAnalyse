@@ -6,9 +6,27 @@ SELECT PLANT,
   MATERIAL,
   GRT,
   CASE
-    WHEN PLANT <> 'WB'
+    WHEN PLANT = '5040' AND GRT < 7
     THEN 'Need To Check'
     ELSE 'Changed Done'
   END LS_CHECK
 FROM INV_SAP_PP_OPT_X
-WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
+WHERE PLANT IN ('5040'), '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
+
+
+
+
+
+
+
+
+SELECT PLANT,
+  MATERIAL,
+  GRT,
+  CASE
+    WHEN GRT < 7
+    THEN 'Need To Check'
+    ELSE 'Changed Done'
+  END LS_CHECK
+FROM INV_SAP_PP_OPT_X
+WHERE PLANT IN ('5040');

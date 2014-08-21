@@ -322,9 +322,21 @@
 						  MATERIALID
 						  ||'_'
 						  ||SUBSTR(VENDOR_NAME,0,4)           AS VENDOR_ITEM,
-						  (SAFETY_STK)                        AS MIN_INV,
-						  CEIL(SAFETY_STK + 0.5*LOT_SIZE_QTY) AS TARGET_INV,
-						  CEIL(SAFETY_STK + 1.2*LOT_SIZE_QTY) AS MAX_INV,
+              CASE WHEN NVL(SAFETY_STK,0) = 0 
+              THEN 0
+              ELSE NVL(SAFETY_STK,0)
+              END MIN_INV,
+              CASE WHEN NVL(SAFETY_STK,0) = 0 
+              THEN 0
+              ELSE CEIL(NVL(SAFETY_STK,0) + 0.5*LOT_SIZE_QTY)
+              END TARGET_INV,
+              CASE WHEN NVL(SAFETY_STK,0) = 0 
+              THEN 0
+              ELSE CEIL(NVL(SAFETY_STK,0) + 1.2*LOT_SIZE_QTY)
+              END MAX_INV,           
+						  --(SAFETY_STK)                        AS MIN_INV,
+						  --CEIL(SAFETY_STK + 0.5*LOT_SIZE_QTY) AS TARGET_INV,
+						  --CEIL(SAFETY_STK + 1.2*LOT_SIZE_QTY) AS MAX_INV,
 						  LOT_SIZE_QTY,
 						  LOT_ROUNDING_VALUE,
 						  LOT_SIZE_DISLS,

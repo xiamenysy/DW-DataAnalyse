@@ -556,7 +556,7 @@ FROM
             SALESDOC,
             OPENQTY AS SALE_OPEN_QTY
           FROM INV_SAP_SALES_HST
-          WHERE REQUIREDDELIVERYDATE < TO_CHAR(sysdate + 91)
+          WHERE REQUIREDDELIVERYDATE < TO_CHAR(sysdate + 10)
           AND SALESDOCTYPE                            IN ('ZOR1','ZOR5')
           AND OPENQTY                > 0
           )
@@ -657,12 +657,12 @@ FROM
           ||PLANTID AS ID,
           MATERIALID,
           PLANTID,
-          TO_CHAR(DATEDELIVERY,'iw') AS WEEK_NUMBER,
+          DATEDELIVERY,
           PONUMBER,
           PO_OPENQTY AS OPEN_PLAN_QTY
-        SELECT * FROM INV_SAP_IO_INPUTS_DAILY WHERE INPUT_TYPE = 'PURCH_REQ' AND PLANTID = '5040'
-        WHERE INPUT_TYPE = 'PLAN_PD_PO'
-        AND DATEDELIVERY < TO_CHAR(sysdate + 91)
+          FROM INV_SAP_IO_INPUTS_DAILY 
+        WHERE INPUT_TYPE IN ('PLAN_PD_PO','FIRM')
+        AND DATEDELIVERY < TO_CHAR(sysdate + 10) AND PLANTID IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
         --SELECT * FROM  INV_SAP_IO_INPUTS_DAILY WHERE MATERIALID = '1769-OW16 A' AND PLANTID = '5040' AND PONUMBER = '1554930410'
         )
       )
@@ -800,33 +800,40 @@ CREATE TABLE INV_SAP_RCCP_INDREQ
 
 
 
-
-
+GRC 5040
+HK   5050
+India  5070
+Tai Wan  5110
+Malaysia  5120
+Philippines   5160
+Thailand   5190
+SGP      5200  
 
 
 
 
 
 SELECT MATERIALID
-        ||'_'
-        ||PLANTID                           AS ID,
-        MATERIALID                          AS MATERIALID,
-        PLANTID                             AS PLANTID,
-       PLNMG_PLANNEDQUANTITY AS FC_AVG13_WEEK_QTY
-      FROM INV_SAP_PP_FRCST_PBIM_PBED
-      WHERE (PDATU_DELIV_ORDFINISHDATE BETWEEN TO_CHAR(sysdate) AND TO_CHAR(sysdate + 91))
-      AND VERSBP_VERSION = '55'
-      GROUP BY MATERIALID,
-        PLANTID
+  ||'_'
+  ||PLANTID AS ID,
+  MATERIALID,
+  CASE WHEN INPUT_TYPE = 'PLAN_PD_PO'
+  THEN 'PLAN_ODR'
+  ELSE 'FIRM'
+  END ORDER_TYPE,
+  PLANTID,
+  DATEDELIVERY,
+  PONUMBER,
+  PO_OPENQTY AS OPEN_PLAN_QTY
+FROM INV_SAP_IO_INPUTS_DAILY
+WHERE INPUT_TYPE                   IN ('PLAN_PD_PO','FIRM') AND MATERIAL = '196477'
+AND DATEDELIVERY  < TO_CHAR(sysdate + 42)
+AND PLANTID                        IN ('5040', '5050', '5110', '5120', '5160', '5190', '5200','5070')
 
 
 
-
-
-
-
-
-
-
-select VERSBP_VERSION from INV_SAP_PP_FRCST_PBIM_PBED where plantid = '5040' and materialid = '1756-IB16 A' and VERSBP_VERSION = '55'
-select PLNMG_PLANNEDQUANTITY from DWQ$LIBRARIAN.INV_SAP_PP_FRCST_PBIM_PBED@rockwell_dblink where plantid = '5040'
+SELECT *
+FROM INV_SAP_IO_INPUTS_DAILY
+WHERE INPUT_TYPE                   IN ('PLAN_PD_PO','FIRM') AND MATERIALID = '196477'
+AND DATEDELIVERY  < TO_CHAR(sysdate + 42)
+AND PLANTID                        IN ('5050')
