@@ -100,3 +100,21 @@ FROM
     )
   )group by ID, MATERIALID;
   
+  
+ -- SELECT ACCURATE DATE IN DB
+ -- IF SYSDATE IN 8.27, SO UNDER SELECT CODE JUST SELCT 8.26 DATA
+ SELECT * FROM INV_SAP_INV_REC WHERE REC_DATE BETWEEN TO_CHAR(SYSDATE - 1) AND TO_CHAR(SYSDATE) AND ID = 'PN-C76223_5200'
+ 
+ 
+ -- Find Mon,Tue...
+ SELECT to_char(to_date('20041009','yyyymmdd'),'D') FROM DUAL
+
+to_char(some_date,'D') returns a number indicating the weekday.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

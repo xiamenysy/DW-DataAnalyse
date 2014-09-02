@@ -378,7 +378,7 @@ SELECT * FROM INV_SAP_INVENTORY_BY_PLANT WHERE PLANTID = '5150'
 		
 		Job Initialization: 
 		DROP TABLE INV_SAP_SVD_REPORT;
-		CREATE TABLE INV_SAP_ITEM_SO_STAT AS SELECT * FROM VIEW_INV_SAP_SVD_REPORT;
+		CREATE TABLE INV_SAP_SVD_REPORT AS SELECT * FROM VIEW_INV_SAP_SVD_REPORT;
 		
 	2.18 Job Name: Job_Daily_JOB_LOG_TABLE
 		Job Time: 8:45 AM
@@ -496,40 +496,128 @@ SELECT * FROM INV_SAP_INVENTORY_BY_PLANT WHERE PLANTID = '5150'
 				
         
   3.3 Job Name: Job_Weekly_INV_REC
-		Job Time: 11:00 AM
+		Job Time: 9:30 AM
 		Job Repeat Frequency: Weekly.Every 5 times per week
 		Job Procedure:
 		DECLARE
-		  INSERT_TABLE_INV_REC  VARCHAR2(1000);
-		BEGIN
-		  INSERT_TABLE_INV_REC := 'INSERT INTO INV_SAP_INV_REC
-      SELECT 
-      SYSDATE||''_''||MATERIALID||''_''||PLANTID AS INV_ID,
-      MATERIALID||''_''||PLANTID AS ID,
-      SYSDATE AS REC_DATE,
-      MATERIALID,
-      PLANTID,
-      LOCATIONID,
-      OH_QTY
-      FROM INV_SAP_INVENTORY_BY_PLANT WHERE PLANTID IN ('||5040||', '||5050||', '||5100||', '||5110||', '||5120||', '||5160||', '||5190||', '||5200||','||5070||','||5140||','||5180||','||5150||','||5130||')';
-		  EXECUTE IMMEDIATE INSERT_TABLE_INV_REC;
-		END;
+    INSERT_TABLE_INV_REC  VARCHAR2(5000);
+    BEGIN
+      INSERT_TABLE_INV_REC := 'INSERT INTO INV_SAP_INV_REC
+      SELECT
+      DISTINCT
+      INV.INV_ID                                                                           AS INV_ID,
+      INV.ID                                                                               AS ID,
+      INV.REC_DATE                                                                         AS REC_DATE,
+      INV.PLANTID                                                                          AS PLANTID,
+      INV.MATERIALID                                                                       AS MATERIAL,
+      PP.CATALOG_DASH                                                                      AS CATALOG_DASH,
+      PP.SAFETY_STOCK                                                                      AS SAFETY_STOCK,
+      PP.UNIT_COST                                                                         AS UNIT_COST,
+      PP.STRATEGY_GRP                                                                      AS STRATEGY_GRP,
+      PP.PROD_BU                                                                           AS PROD_BU,
+      PP.PROD_FAM                                                                          AS PROD_FAM,
+      PP.MATL_TYPE                                                                         AS MATL_TYPE,
+      NVL(INV.OH_QTY,0)                                                                    AS OH_QTY,
+      NVL(PP.MIN_INV,0)                                                                    AS MIN_INV,
+      NVL(PP.TARGET_INV,0)                                                                 AS TARGET_INV,
+      NVL(PP.MAX_INV,0)                                                                    AS MAX_INV,
+      (NVL(INV.OH_QTY,0)    *NVL(PP.UNIT_COST,0))                                          AS OH_VAL,
+      (NVL(PP.MIN_INV,0)    *NVL(PP.UNIT_COST,0))                                          AS MIN_INV_VAL,
+      (NVL(PP.TARGET_INV,0) *NVL(PP.UNIT_COST,0))                                          AS TARGET_INV_VAL,
+      (NVL(PP.MAX_INV,0)    *NVL(PP.UNIT_COST,0))                                          AS MAX_INV_VAL,
+      (NVL(INV.OH_QTY,0)    *NVL(PP.UNIT_COST,0) - NVL(PP.MAX_INV,0) *NVL(PP.UNIT_COST,0)) AS OVER_MAX_VAL
+    FROM
+      (SELECT 
+        SYSDATE||''_''||MATERIALID||''_''||PLANTID AS INV_ID,
+        MATERIALID||''_''||PLANTID AS ID,
+        SYSDATE AS REC_DATE,
+        MATERIALID,
+        PLANTID,
+        LOCATIONID,
+        OH_QTY
+      FROM INV_SAP_INVENTORY_BY_PLANT WHERE PLANTID IN ('||5040||', '||5050||', '||5100||', '||5110||', '||5120||', '||5160||', '||5190||', '||5200||','||5070||','||5140||','||5180||','||5150||','||5130||')
+      )INV
+    LEFT JOIN
+      (SELECT ID,
+        MATERIAL,
+        CATALOG_DASH,
+        PLANT,
+        SAFETY_STOCK,
+        UNIT,
+        UNIT_COST,
+        STRATEGY_GRP,
+        PROD_BU,
+        PROD_FAM,
+        MATL_TYPE,
+        MIN_INV,
+        TARGET_INV,
+        MAX_INV,
+        LEAD_TIME
+      FROM INV_SAP_PP_OPT_X
+      )PP
+    ON PP.ID = INV.ID';
+    EXECUTE IMMEDIATE INSERT_TABLE_INV_REC;
+    END;
     		
 		Job Initialization:    
     DROP TABLE INV_SAP_INV_REC;
-    SELECT * FROM INV_SAP_INV_REC;
     CREATE TABLE INV_SAP_INV_REC AS
-    SELECT 
-    SYSDATE||'_'||MATERIALID||'_'||PLANTID AS INV_ID,
-    MATERIALID||'_'||PLANTID AS ID,
-    SYSDATE AS REC_DATE,
-    MATERIALID,
-    PLANTID,
-    LOCATIONID,
-    OH_QTY
-    FROM INV_SAP_INVENTORY_BY_PLANT
-    WHERE PLANTID IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140','5130','5150','5180')
-
+    SELECT DISTINCT INV.INV_ID                                                             AS INV_ID,
+      INV.ID                                                                               AS ID,
+      INV.REC_DATE                                                                         AS REC_DATE,
+      INV.PLANTID                                                                          AS PLANTID,
+      INV.MATERIALID                                                                       AS MATERIAL,
+      PP.CATALOG_DASH                                                                      AS CATALOG_DASH,
+      PP.SAFETY_STOCK                                                                      AS SAFETY_STOCK,
+      PP.UNIT_COST                                                                         AS UNIT_COST,
+      PP.STRATEGY_GRP                                                                      AS STRATEGY_GRP,
+      PP.PROD_BU                                                                           AS PROD_BU,
+      PP.PROD_FAM                                                                          AS PROD_FAM,
+      PP.MATL_TYPE                                                                         AS MATL_TYPE,
+      NVL(INV.OH_QTY,0)                                                                    AS OH_QTY,
+      NVL(PP.MIN_INV,0)                                                                    AS MIN_INV,
+      NVL(PP.TARGET_INV,0)                                                                 AS TARGET_INV,
+      NVL(PP.MAX_INV,0)                                                                    AS MAX_INV,
+      (NVL(INV.OH_QTY,0)    *NVL(PP.UNIT_COST,0))                                          AS OH_VAL,
+      (NVL(PP.MIN_INV,0)    *NVL(PP.UNIT_COST,0))                                          AS MIN_INV_VAL,
+      (NVL(PP.TARGET_INV,0) *NVL(PP.UNIT_COST,0))                                          AS TARGET_INV_VAL,
+      (NVL(PP.MAX_INV,0)    *NVL(PP.UNIT_COST,0))                                          AS MAX_INV_VAL,
+      (NVL(INV.OH_QTY,0)    *NVL(PP.UNIT_COST,0) - NVL(PP.MAX_INV,0) *NVL(PP.UNIT_COST,0)) AS OVER_MAX_VAL
+    FROM
+      (SELECT SYSDATE
+        ||'_'
+        ||MATERIALID
+        ||'_'
+        ||PLANTID AS INV_ID,
+        MATERIALID
+        ||'_'
+        ||PLANTID AS ID,
+        SYSDATE   AS REC_DATE,
+        MATERIALID,
+        PLANTID,
+        OH_QTY
+      FROM INV_SAP_INVENTORY_BY_PLANT
+      WHERE PLANTID IN ('||5040||', '||5050||', '||5100||', '||5110||', '||5120||', '||5160||', '||5190||', '||5200||','||5070||','||5140||','||5180||','||5150||','||5130||')
+      )INV
+    LEFT JOIN
+      (SELECT ID,
+        MATERIAL,
+        CATALOG_DASH,
+        PLANT,
+        SAFETY_STOCK,
+        UNIT,
+        UNIT_COST,
+        STRATEGY_GRP,
+        PROD_BU,
+        PROD_FAM,
+        MATL_TYPE,
+        MIN_INV,
+        TARGET_INV,
+        MAX_INV,
+        LEAD_TIME
+      FROM INV_SAP_PP_OPT_X WHERE SAFETY_STOCK = 0
+      )PP
+    ON PP.ID = INV.ID;
 
 --Monthly Jobs
 	4.1 Job Name: Job_Monthly_INV_SHIPSOLD
@@ -625,3 +713,17 @@ SELECT * FROM INV_SAP_INVENTORY_BY_PLANT WHERE PLANTID = '5150'
 		  END LOOP;
 		  COMMIT;
 		END;
+    
+ 
+    
+    
+    
+DECLARE
+  CREATE_INV_SAP_MATL_CATA        VARCHAR2(1000);
+  DROP_INV_SAP_MATL_CATA            VARCHAR2(1000);
+BEGIN
+  DROP_INV_SAP_MATL_CATA:= 'DROP TABLE INV_SAP_MATERIAL_CATALOG';
+  CREATE_INV_SAP_MATL_CATA:= 'CREATE TABLE INV_SAP_MATERIAL_CATALOG AS SELECT * FROM DWQ$LIBRARIAN.INV_SAP_MATERIAL_CATALOG@ROCKWELL_DW_DBLINK';
+  EXECUTE IMMEDIATE DROP_TABLE;
+  EXECUTE IMMEDIATE STR_CREATE_TABLE;
+END;

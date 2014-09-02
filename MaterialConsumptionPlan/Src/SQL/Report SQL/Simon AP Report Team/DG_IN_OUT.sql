@@ -2714,3 +2714,1086 @@ FROM
     ON OUT_MM.ID = STOPP.ID
   )
 WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
+
+
+
+
+
+
+
+
+CREATE VIEW VIEW_INV_DG_IO_TMP_22 AS 
+SELECT ID,
+  MATERIAL,
+  PLANT,
+  CATALOG_DASH,
+  SAFETY_STOCK,
+  OH_QTY,
+  STRATEGY_GRP,
+  MRP_TYPE,
+  VENDOR,
+  BU,
+  LEAD_TIME,
+  UNIT_COST,
+  MRP_CONTROLLER,
+  ULTIMATE_SOURCE,
+  (NVL(OUT_SO_MONTH_1,0)    + NVL(OUT_FC_MONTH_1,0))                           AS OUT_MM_1,
+  (NVL(OUT_SO_MONTH_2,0)    + NVL(OUT_FC_MONTH_2,0))                           AS OUT_MM_2,
+  (NVL(OUT_SO_MONTH_3,0)    + NVL(OUT_FC_MONTH_3,0))                           AS OUT_MM_3,
+  (NVL(OUT_SO_MONTH_4,0)    + NVL(OUT_FC_MONTH_4,0))                           AS OUT_MM_4,
+  (NVL(OUT_SO_MONTH_5,0)    + NVL(OUT_FC_MONTH_5,0))                           AS OUT_MM_5,
+  (NVL(OUT_SO_MONTH_6,0)    + NVL(OUT_FC_MONTH_6,0))                           AS OUT_MM_6,
+  (NVL(OUT_SO_MONTH_7,0)    + NVL(OUT_FC_MONTH_7,0))                           AS OUT_MM_7,
+  (NVL(OUT_SO_MONTH_8,0)    + NVL(OUT_FC_MONTH_8,0))                           AS OUT_MM_8,
+  (NVL(OUT_SO_MONTH_9,0)    + NVL(OUT_FC_MONTH_9,0))                           AS OUT_MM_9,
+  (NVL(OUT_SO_MONTH_10,0)   + NVL(OUT_FC_MONTH_10,0))                          AS OUT_MM_10,
+  (NVL(OUT_SO_MONTH_11,0)   + NVL(OUT_FC_MONTH_11,0))                          AS OUT_MM_11,
+  (NVL(OUT_SO_MONTH_12,0)   + NVL(OUT_FC_MONTH_12,0))                          AS OUT_MM_12,
+  (NVL(OUT_SO_MONTH_13,0)   + NVL(OUT_FC_MONTH_13,0))                          AS OUT_MM_13,
+  (NVL(IN_POSTO_MONTH_1,0)  + NVL(IN_PR_MONTH_1,0) + NVL(IN_PLAN_MONTH_1,0))   AS IN_MM_1,
+  (NVL(IN_POSTO_MONTH_2,0)  + NVL(IN_PR_MONTH_2,0) + NVL(IN_PLAN_MONTH_2,0))   AS IN_MM_2,
+  (NVL(IN_POSTO_MONTH_3,0)  + NVL(IN_PR_MONTH_3,0) + NVL(IN_PLAN_MONTH_3,0))   AS IN_MM_3,
+  (NVL(IN_POSTO_MONTH_4,0)  + NVL(IN_PR_MONTH_4,0) + NVL(IN_PLAN_MONTH_4,0))   AS IN_MM_4,
+  (NVL(IN_POSTO_MONTH_5,0)  + NVL(IN_PR_MONTH_5,0) + NVL(IN_PLAN_MONTH_5,0))   AS IN_MM_5,
+  (NVL(IN_POSTO_MONTH_6,0)  + NVL(IN_PR_MONTH_6,0) + NVL(IN_PLAN_MONTH_6,0))   AS IN_MM_6,
+  (NVL(IN_POSTO_MONTH_7,0)  + NVL(IN_PR_MONTH_7,0) + NVL(IN_PLAN_MONTH_7,0))   AS IN_MM_7,
+  (NVL(IN_POSTO_MONTH_8,0)  + NVL(IN_PR_MONTH_8,0) + NVL(IN_PLAN_MONTH_8,0))   AS IN_MM_8,
+  (NVL(IN_POSTO_MONTH_9,0)  + NVL(IN_PR_MONTH_9,0) + NVL(IN_PLAN_MONTH_9,0))   AS IN_MM_9,
+  (NVL(IN_POSTO_MONTH_10,0) + NVL(IN_PR_MONTH_10,0) + NVL(IN_PLAN_MONTH_10,0)) AS IN_MM_10,
+  (NVL(IN_POSTO_MONTH_11,0) + NVL(IN_PR_MONTH_11,0) + NVL(IN_PLAN_MONTH_11,0)) AS IN_MM_11,
+  (NVL(IN_POSTO_MONTH_12,0) + NVL(IN_PR_MONTH_12,0) + NVL(IN_PLAN_MONTH_12,0)) AS IN_MM_12,
+  (NVL(IN_POSTO_MONTH_13,0) + NVL(IN_PR_MONTH_13,0) + NVL(IN_PLAN_MONTH_13,0)) AS IN_MM_13
+FROM
+  (SELECT ITEM_SFSP.ID        AS ID,
+    ITEM_SFSP.MATERIAL        AS MATERIAL,
+    ITEM_SFSP.PLANT           AS PLANT,
+    ITEM_SFSP.CATALOG_DASH    AS CATALOG_DASH,
+    ITEM_SFSP.SAFETY_STOCK    AS SAFETY_STOCK,
+    ITEM_SFSP.OH_QTY          AS OH_QTY,
+    ITEM_SFSP.STRATEGY_GRP    AS STRATEGY_GRP,
+    ITEM_SFSP.MRP_TYPE        AS MRP_TYPE,
+    ITEM_SFSP.VENDOR          AS VENDOR,
+    ITEM_SFSP.BU              AS BU,
+    ITEM_SFSP.LEAD_TIME       AS LEAD_TIME,
+    ITEM_SFSP.UNIT_COST       AS UNIT_COST,
+    ITEM_SFSP.MRP_CONTROLLER  AS MRP_CONTROLLER,
+    ITEM_SFSP.ULTIMATE_SOURCE AS ULTIMATE_SOURCE,
+    ITEM_SFSP.SO_MONTH_1      AS OUT_SO_MONTH_1,
+    ITEM_SFSP.SO_MONTH_2      AS OUT_SO_MONTH_2,
+    ITEM_SFSP.SO_MONTH_3      AS OUT_SO_MONTH_3,
+    ITEM_SFSP.SO_MONTH_4      AS OUT_SO_MONTH_4,
+    ITEM_SFSP.SO_MONTH_5      AS OUT_SO_MONTH_5,
+    ITEM_SFSP.SO_MONTH_6      AS OUT_SO_MONTH_6,
+    ITEM_SFSP.SO_MONTH_7      AS OUT_SO_MONTH_7,
+    ITEM_SFSP.SO_MONTH_8      AS OUT_SO_MONTH_8,
+    ITEM_SFSP.SO_MONTH_9      AS OUT_SO_MONTH_9,
+    ITEM_SFSP.SO_MONTH_10     AS OUT_SO_MONTH_10,
+    ITEM_SFSP.SO_MONTH_11     AS OUT_SO_MONTH_11,
+    ITEM_SFSP.SO_MONTH_12     AS OUT_SO_MONTH_12,
+    ITEM_SFSP.SO_MONTH_13     AS OUT_SO_MONTH_13,
+    ITEM_SFSP.FC_MONTH_1      AS OUT_FC_MONTH_1,
+    ITEM_SFSP.FC_MONTH_2      AS OUT_FC_MONTH_2,
+    ITEM_SFSP.FC_MONTH_3      AS OUT_FC_MONTH_3,
+    ITEM_SFSP.FC_MONTH_4      AS OUT_FC_MONTH_4,
+    ITEM_SFSP.FC_MONTH_5      AS OUT_FC_MONTH_5,
+    ITEM_SFSP.FC_MONTH_6      AS OUT_FC_MONTH_6,
+    ITEM_SFSP.FC_MONTH_7      AS OUT_FC_MONTH_7,
+    ITEM_SFSP.FC_MONTH_8      AS OUT_FC_MONTH_8,
+    ITEM_SFSP.FC_MONTH_9      AS OUT_FC_MONTH_9,
+    ITEM_SFSP.FC_MONTH_10     AS OUT_FC_MONTH_10,
+    ITEM_SFSP.FC_MONTH_11     AS OUT_FC_MONTH_11,
+    ITEM_SFSP.FC_MONTH_12     AS OUT_FC_MONTH_12,
+    ITEM_SFSP.FC_MONTH_13     AS OUT_FC_MONTH_13,
+    ITEM_SFSP.POSTO_MONTH_1   AS IN_POSTO_MONTH_1,
+    ITEM_SFSP.POSTO_MONTH_2   AS IN_POSTO_MONTH_2,
+    ITEM_SFSP.POSTO_MONTH_3   AS IN_POSTO_MONTH_3,
+    ITEM_SFSP.POSTO_MONTH_4   AS IN_POSTO_MONTH_4,
+    ITEM_SFSP.POSTO_MONTH_5   AS IN_POSTO_MONTH_5,
+    ITEM_SFSP.POSTO_MONTH_6   AS IN_POSTO_MONTH_6,
+    ITEM_SFSP.POSTO_MONTH_7   AS IN_POSTO_MONTH_7,
+    ITEM_SFSP.POSTO_MONTH_8   AS IN_POSTO_MONTH_8,
+    ITEM_SFSP.POSTO_MONTH_9   AS IN_POSTO_MONTH_9,
+    ITEM_SFSP.POSTO_MONTH_10  AS IN_POSTO_MONTH_10,
+    ITEM_SFSP.POSTO_MONTH_11  AS IN_POSTO_MONTH_11,
+    ITEM_SFSP.POSTO_MONTH_12  AS IN_POSTO_MONTH_12,
+    ITEM_SFSP.POSTO_MONTH_13  AS IN_POSTO_MONTH_13,
+    ITEM_SFSP.PR_MONTH_1         AS IN_PR_MONTH_1,
+    ITEM_SFSP.PR_MONTH_2         AS IN_PR_MONTH_2,
+    ITEM_SFSP.PR_MONTH_3         AS IN_PR_MONTH_3,
+    ITEM_SFSP.PR_MONTH_4         AS IN_PR_MONTH_4,
+    ITEM_SFSP.PR_MONTH_5         AS IN_PR_MONTH_5,
+    ITEM_SFSP.PR_MONTH_6         AS IN_PR_MONTH_6,
+    ITEM_SFSP.PR_MONTH_7         AS IN_PR_MONTH_7,
+    ITEM_SFSP.PR_MONTH_8         AS IN_PR_MONTH_8,
+    ITEM_SFSP.PR_MONTH_9         AS IN_PR_MONTH_9,
+    ITEM_SFSP.PR_MONTH_10        AS IN_PR_MONTH_10,
+    ITEM_SFSP.PR_MONTH_11        AS IN_PR_MONTH_11,
+    ITEM_SFSP.PR_MONTH_12        AS IN_PR_MONTH_12,
+    ITEM_SFSP.PR_MONTH_13        AS IN_PR_MONTH_13,
+    PLAN_MM.PLAN_MONTH_1     AS IN_PLAN_MONTH_1,
+    PLAN_MM.PLAN_MONTH_2     AS IN_PLAN_MONTH_2,
+    PLAN_MM.PLAN_MONTH_3     AS IN_PLAN_MONTH_3,
+    PLAN_MM.PLAN_MONTH_4     AS IN_PLAN_MONTH_4,
+    PLAN_MM.PLAN_MONTH_5     AS IN_PLAN_MONTH_5,
+    PLAN_MM.PLAN_MONTH_6     AS IN_PLAN_MONTH_6,
+    PLAN_MM.PLAN_MONTH_7     AS IN_PLAN_MONTH_7,
+    PLAN_MM.PLAN_MONTH_8     AS IN_PLAN_MONTH_8,
+    PLAN_MM.PLAN_MONTH_9     AS IN_PLAN_MONTH_9,
+    PLAN_MM.PLAN_MONTH_10    AS IN_PLAN_MONTH_10,
+    PLAN_MM.PLAN_MONTH_11    AS IN_PLAN_MONTH_11,
+    PLAN_MM.PLAN_MONTH_12    AS IN_PLAN_MONTH_12,
+    PLAN_MM.PLAN_MONTH_13    AS IN_PLAN_MONTH_13
+  FROM
+    (SELECT ITEM_SFS.ID,
+      ITEM_SFS.MATERIAL,
+      ITEM_SFS.PLANT,
+      ITEM_SFS.CATALOG_DASH,
+      ITEM_SFS.SAFETY_STOCK,
+      ITEM_SFS.OH_QTY,
+      ITEM_SFS.STRATEGY_GRP,
+      ITEM_SFS.MRP_TYPE,
+      ITEM_SFS.VENDOR,
+      ITEM_SFS.BU,
+      ITEM_SFS.LEAD_TIME,
+      ITEM_SFS.UNIT_COST,
+      ITEM_SFS.MRP_CONTROLLER,
+      ITEM_SFS.ULTIMATE_SOURCE,
+      ITEM_SFS.SO_MONTH_1,
+      ITEM_SFS.SO_MONTH_2,
+      ITEM_SFS.SO_MONTH_3,
+      ITEM_SFS.SO_MONTH_4,
+      ITEM_SFS.SO_MONTH_5,
+      ITEM_SFS.SO_MONTH_6,
+      ITEM_SFS.SO_MONTH_7,
+      ITEM_SFS.SO_MONTH_8,
+      ITEM_SFS.SO_MONTH_9,
+      ITEM_SFS.SO_MONTH_10,
+      ITEM_SFS.SO_MONTH_11,
+      ITEM_SFS.SO_MONTH_12,
+      ITEM_SFS.SO_MONTH_13,
+      ITEM_SFS.FC_MONTH_1,
+      ITEM_SFS.FC_MONTH_2,
+      ITEM_SFS.FC_MONTH_3,
+      ITEM_SFS.FC_MONTH_4,
+      ITEM_SFS.FC_MONTH_5,
+      ITEM_SFS.FC_MONTH_6,
+      ITEM_SFS.FC_MONTH_7,
+      ITEM_SFS.FC_MONTH_8,
+      ITEM_SFS.FC_MONTH_9,
+      ITEM_SFS.FC_MONTH_10,
+      ITEM_SFS.FC_MONTH_11,
+      ITEM_SFS.FC_MONTH_12,
+      ITEM_SFS.FC_MONTH_13,
+      ITEM_SFS.POSTO_MONTH_1,
+      ITEM_SFS.POSTO_MONTH_2,
+      ITEM_SFS.POSTO_MONTH_3,
+      ITEM_SFS.POSTO_MONTH_4,
+      ITEM_SFS.POSTO_MONTH_5,
+      ITEM_SFS.POSTO_MONTH_6,
+      ITEM_SFS.POSTO_MONTH_7,
+      ITEM_SFS.POSTO_MONTH_8,
+      ITEM_SFS.POSTO_MONTH_9,
+      ITEM_SFS.POSTO_MONTH_10,
+      ITEM_SFS.POSTO_MONTH_11,
+      ITEM_SFS.POSTO_MONTH_12,
+      ITEM_SFS.POSTO_MONTH_13,
+      PR_MM.PR_MONTH_1,
+      PR_MM.PR_MONTH_2,
+      PR_MM.PR_MONTH_3,
+      PR_MM.PR_MONTH_4,
+      PR_MM.PR_MONTH_5,
+      PR_MM.PR_MONTH_6,
+      PR_MM.PR_MONTH_7,
+      PR_MM.PR_MONTH_8,
+      PR_MM.PR_MONTH_9,
+      PR_MM.PR_MONTH_10,
+      PR_MM.PR_MONTH_11,
+      PR_MM.PR_MONTH_12,
+      PR_MM.PR_MONTH_13
+    FROM
+      (SELECT ITEM_SO_FC.ID,
+        ITEM_SO_FC.MATERIAL,
+        ITEM_SO_FC.PLANT,
+        ITEM_SO_FC.CATALOG_DASH,
+        ITEM_SO_FC.SAFETY_STOCK,
+        ITEM_SO_FC.OH_QTY,
+        ITEM_SO_FC.STRATEGY_GRP,
+        ITEM_SO_FC.MRP_TYPE,
+        ITEM_SO_FC.VENDOR,
+        ITEM_SO_FC.BU,
+        ITEM_SO_FC.LEAD_TIME,
+        ITEM_SO_FC.UNIT_COST,
+        ITEM_SO_FC.MRP_CONTROLLER,
+        ITEM_SO_FC.ULTIMATE_SOURCE,
+        ITEM_SO_FC.SO_MONTH_1,
+        ITEM_SO_FC.SO_MONTH_2,
+        ITEM_SO_FC.SO_MONTH_3,
+        ITEM_SO_FC.SO_MONTH_4,
+        ITEM_SO_FC.SO_MONTH_5,
+        ITEM_SO_FC.SO_MONTH_6,
+        ITEM_SO_FC.SO_MONTH_7,
+        ITEM_SO_FC.SO_MONTH_8,
+        ITEM_SO_FC.SO_MONTH_9,
+        ITEM_SO_FC.SO_MONTH_10,
+        ITEM_SO_FC.SO_MONTH_11,
+        ITEM_SO_FC.SO_MONTH_12,
+        ITEM_SO_FC.SO_MONTH_13,
+        ITEM_SO_FC.FC_MONTH_1,
+        ITEM_SO_FC.FC_MONTH_2,
+        ITEM_SO_FC.FC_MONTH_3,
+        ITEM_SO_FC.FC_MONTH_4,
+        ITEM_SO_FC.FC_MONTH_5,
+        ITEM_SO_FC.FC_MONTH_6,
+        ITEM_SO_FC.FC_MONTH_7,
+        ITEM_SO_FC.FC_MONTH_8,
+        ITEM_SO_FC.FC_MONTH_9,
+        ITEM_SO_FC.FC_MONTH_10,
+        ITEM_SO_FC.FC_MONTH_11,
+        ITEM_SO_FC.FC_MONTH_12,
+        ITEM_SO_FC.FC_MONTH_13,
+        STO_MM.POSTO_MONTH_1,
+        STO_MM.POSTO_MONTH_2,
+        STO_MM.POSTO_MONTH_3,
+        STO_MM.POSTO_MONTH_4,
+        STO_MM.POSTO_MONTH_5,
+        STO_MM.POSTO_MONTH_6,
+        STO_MM.POSTO_MONTH_7,
+        STO_MM.POSTO_MONTH_8,
+        STO_MM.POSTO_MONTH_9,
+        STO_MM.POSTO_MONTH_10,
+        STO_MM.POSTO_MONTH_11,
+        STO_MM.POSTO_MONTH_12,
+        STO_MM.POSTO_MONTH_13
+      FROM
+        (SELECT ITEM_SO.ID,
+          ITEM_SO.MATERIAL,
+          ITEM_SO.PLANT,
+          ITEM_SO.CATALOG_DASH,
+          ITEM_SO.SAFETY_STOCK,
+          ITEM_SO.OH_QTY,
+          ITEM_SO.STRATEGY_GRP,
+          ITEM_SO.MRP_TYPE,
+          ITEM_SO.VENDOR,
+          ITEM_SO.BU,
+          ITEM_SO.LEAD_TIME,
+          ITEM_SO.UNIT_COST,
+          ITEM_SO.MRP_CONTROLLER,
+          ITEM_SO.ULTIMATE_SOURCE,
+          ITEM_SO.SO_MONTH_1,
+          ITEM_SO.SO_MONTH_2,
+          ITEM_SO.SO_MONTH_3,
+          ITEM_SO.SO_MONTH_4,
+          ITEM_SO.SO_MONTH_5,
+          ITEM_SO.SO_MONTH_6,
+          ITEM_SO.SO_MONTH_7,
+          ITEM_SO.SO_MONTH_8,
+          ITEM_SO.SO_MONTH_9,
+          ITEM_SO.SO_MONTH_10,
+          ITEM_SO.SO_MONTH_11,
+          ITEM_SO.SO_MONTH_12,
+          ITEM_SO.SO_MONTH_13,
+          FC_MM.FC_MONTH_1,
+          FC_MM.FC_MONTH_2,
+          FC_MM.FC_MONTH_3,
+          FC_MM.FC_MONTH_4,
+          FC_MM.FC_MONTH_5,
+          FC_MM.FC_MONTH_6,
+          FC_MM.FC_MONTH_7,
+          FC_MM.FC_MONTH_8,
+          FC_MM.FC_MONTH_9,
+          FC_MM.FC_MONTH_10,
+          FC_MM.FC_MONTH_11,
+          FC_MM.FC_MONTH_12,
+          FC_MM.FC_MONTH_13
+        FROM
+          (SELECT ITEM_BSC.ID,
+            ITEM_BSC.MATERIAL,
+            ITEM_BSC.PLANT,
+            ITEM_BSC.CATALOG_DASH,
+            ITEM_BSC.SAFETY_STOCK,
+            ITEM_BSC.OH_QTY,
+            ITEM_BSC.STRATEGY_GRP,
+            ITEM_BSC.MRP_TYPE,
+            ITEM_BSC.VENDOR,
+            ITEM_BSC.BU,
+            ITEM_BSC.LEAD_TIME,
+            ITEM_BSC.UNIT_COST,
+            ITEM_BSC.MRP_CONTROLLER,
+            ITEM_BSC.ULTIMATE_SOURCE,
+            SO_MM.SO_MONTH_1,
+            SO_MM.SO_MONTH_2,
+            SO_MM.SO_MONTH_3,
+            SO_MM.SO_MONTH_4,
+            SO_MM.SO_MONTH_5,
+            SO_MM.SO_MONTH_6,
+            SO_MM.SO_MONTH_7,
+            SO_MM.SO_MONTH_8,
+            SO_MM.SO_MONTH_9,
+            SO_MM.SO_MONTH_10,
+            SO_MM.SO_MONTH_11,
+            SO_MM.SO_MONTH_12,
+            SO_MM.SO_MONTH_13
+          FROM
+            (SELECT ID,
+              MATERIAL,
+              PLANT,
+              CATALOG_DASH,
+              SAFETY_STOCK,
+              OH_QTY,
+              STRATEGY_GRP,
+              MRP_TYPE,
+              SUBSTR(VENDOR_KEY,0,4) AS VENDOR,
+              SUBSTR(PROD_BU,0,3)    AS BU,
+              LEAD_TIME,
+              UNIT_COST,
+              MRP_CONTROLLER,
+              ULTIMATE_SOURCE
+            FROM INV_SAP_PP_OPT_X
+            )ITEM_BSC
+          LEFT JOIN
+            (SELECT ID,
+              MATERIAL,
+              SUM(MONTH_1)  AS SO_MONTH_1,
+              SUM(MONTH_2)  AS SO_MONTH_2,
+              SUM(MONTH_3)  AS SO_MONTH_3,
+              SUM(MONTH_4)  AS SO_MONTH_4,
+              SUM(MONTH_5)  AS SO_MONTH_5,
+              SUM(MONTH_6)  AS SO_MONTH_6,
+              SUM(MONTH_7)  AS SO_MONTH_7,
+              SUM(MONTH_8)  AS SO_MONTH_8,
+              SUM(MONTH_9)  AS SO_MONTH_9,
+              SUM(MONTH_10) AS SO_MONTH_10,
+              SUM(MONTH_11) AS SO_MONTH_11,
+              SUM(MONTH_12) AS SO_MONTH_12,
+              SUM(MONTH_13) AS SO_MONTH_13
+            FROM
+              (SELECT ID,
+            MATERIAL,
+            CASE --8
+              WHEN YEAR_NUMBER <= TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER <= TO_CHAR(SYSDATE,'mm')
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_1,
+            CASE --9
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 1
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_2,
+            CASE --10
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 2
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_3,
+            CASE --11
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 3
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_4,
+            CASE --12
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 4
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_5,
+            CASE --1
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 7
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_6,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 6
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_7,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 5
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_8,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 4
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_9,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 3
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_10,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 2
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_11,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 1
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_12,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm')
+              THEN OPEN_SO_QTY
+              ELSE 0
+            END MONTH_13
+              FROM
+                (SELECT MATERIAL
+                  ||'_'
+                  ||PLANT AS ID,
+                  SALESDOC,
+                  MATERIAL,
+                  PLANT,
+				  TO_CHAR(MAX_REQUEST_DATE,'YY') AS YEAR_NUMBER,
+				  TO_CHAR(MAX_REQUEST_DATE,'mm') AS MONTH_NUMBER,
+                  OPEN_QTY                       AS OPEN_SO_QTY
+                FROM INV_SAP_SALES_VBAK_VBAP_VBUP
+                WHERE MAX_REQUEST_DATE < TO_CHAR(sysdate + 532)
+                )
+              )
+            GROUP BY ID,
+              MATERIAL
+            )SO_MM
+          ON SO_MM.ID = ITEM_BSC.ID
+          )ITEM_SO
+        LEFT JOIN
+          (SELECT ID,
+            MATERIALID,
+            SUM(MONTH_1)  AS FC_MONTH_1,
+            SUM(MONTH_2)  AS FC_MONTH_2,
+            SUM(MONTH_3)  AS FC_MONTH_3,
+            SUM(MONTH_4)  AS FC_MONTH_4,
+            SUM(MONTH_5)  AS FC_MONTH_5,
+            SUM(MONTH_6)  AS FC_MONTH_6,
+            SUM(MONTH_7)  AS FC_MONTH_7,
+            SUM(MONTH_8)  AS FC_MONTH_8,
+            SUM(MONTH_9)  AS FC_MONTH_9,
+            SUM(MONTH_10) AS FC_MONTH_10,
+            SUM(MONTH_11) AS FC_MONTH_11,
+            SUM(MONTH_12) AS FC_MONTH_12,
+            SUM(MONTH_13) AS FC_MONTH_13
+          FROM
+            (SELECT ID,
+            MATERIALID,
+            CASE --8
+              WHEN YEAR_NUMBER <= TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER <= TO_CHAR(SYSDATE,'mm')
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_1,
+            CASE --9
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 1
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_2,
+            CASE --10
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 2
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_3,
+            CASE --11
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 3
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_4,
+            CASE --12
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 4
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_5,
+            CASE --1
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 7
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_6,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 6
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_7,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 5
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_8,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 4
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_9,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 3
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_10,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 2
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_11,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 1
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_12,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm')
+              THEN FC_QTY
+              ELSE 0
+            END MONTH_13
+            FROM
+              (SELECT MATERIALID
+                ||'_'
+                ||PLANTID                               AS ID,
+                MATERIALID                              AS MATERIALID,
+                PLANTID                                 AS PLANTID,
+                TO_CHAR(PDATU_DELIV_ORDFINISHDATE,'YY') AS YEAR_NUMBER,
+                TO_CHAR(PDATU_DELIV_ORDFINISHDATE,'mm') AS MONTH_NUMBER,
+                PLNMG_PLANNEDQUANTITY                   AS FC_QTY
+              FROM INV_SAP_PP_FRCST_PBIM_PBED
+              WHERE (PDATU_DELIV_ORDFINISHDATE < TO_CHAR(sysdate + 532))
+              AND VERSBP_VERSION               = '00'
+              )
+            )
+          GROUP BY ID,
+            MATERIALID
+          )FC_MM
+        ON FC_MM.ID = ITEM_SO.ID
+        )ITEM_SO_FC
+      LEFT JOIN
+        (SELECT ID,
+          MATERIALID,
+          SUM(MONTH_1)  AS POSTO_MONTH_1,
+          SUM(MONTH_2)  AS POSTO_MONTH_2,
+          SUM(MONTH_3)  AS POSTO_MONTH_3,
+          SUM(MONTH_4)  AS POSTO_MONTH_4,
+          SUM(MONTH_5)  AS POSTO_MONTH_5,
+          SUM(MONTH_6)  AS POSTO_MONTH_6,
+          SUM(MONTH_7)  AS POSTO_MONTH_7,
+          SUM(MONTH_8)  AS POSTO_MONTH_8,
+          SUM(MONTH_9)  AS POSTO_MONTH_9,
+          SUM(MONTH_10) AS POSTO_MONTH_10,
+          SUM(MONTH_11) AS POSTO_MONTH_11,
+          SUM(MONTH_12) AS POSTO_MONTH_12,
+          SUM(MONTH_13) AS POSTO_MONTH_13
+        FROM
+          (SELECT ID,
+            MATERIALID,
+            CASE --8
+              WHEN YEAR_NUMBER <= TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER <= TO_CHAR(SYSDATE,'mm')
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_1,
+            CASE --9
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 1
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_2,
+            CASE --10
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 2
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_3,
+            CASE --11
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 3
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_4,
+            CASE --12
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 4
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_5,
+            CASE --1
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 7
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_6,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 6
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_7,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 5
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_8,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 4
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_9,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 3
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_10,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 2
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_11,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 1
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_12,
+            CASE
+              WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+              AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm')
+              THEN OPEN_QTY
+              ELSE 0
+            END MONTH_13
+          FROM
+            (SELECT PO_BS.MATERIALID
+              ||'_'
+              ||PO_BS.PLANTID                    AS ID,
+              PO_BS.PO_ID                        AS PO_ID,
+              PO_BS.MATERIALID                   AS MATERIALID,
+              PO_BS.PLANTID                      AS PLANTID,
+			  TO_CHAR(PO_BS.COMMITTED_DATE,'YY') AS YEAR_NUMBER,
+			  TO_CHAR(PO_BS.COMMITTED_DATE,'mm') AS MONTH_NUMBER,
+              PO_OPEN.OPEN_QTY                   AS OPEN_QTY
+            FROM
+              (SELECT EBELNPURCHDOCNO
+                ||'_'
+                ||MATERIALID   AS PO_ID,
+                MATERIALID     AS MATERIALID,
+                PLANTID        AS PLANTID,
+                COMMITTED_DATE AS COMMITTED_DATE
+              FROM INV_SAP_PP_PO_HISTORY
+              WHERE DELIVERYCOMPLETE      IS NULL
+              AND ETENRPURCHDELIVSCHLINESA = '1'
+              AND BSART_PURCHDOCTYPE                        IN ('ZST','ZNB')
+              AND COMMITTED_DATE           < TO_CHAR(sysdate + 532)
+              )PO_BS
+            LEFT JOIN
+              (SELECT EBELNPURCHDOCNO
+                ||'_'
+                ||MATERIALID      AS PO_ID,
+                SUM(COMMITTEDQTY) AS OPEN_QTY
+              FROM INV_SAP_PP_PO_HISTORY
+              WHERE DELIVERYCOMPLETE IS NULL
+              GROUP BY MATERIALID,
+                PLANTID,
+                EBELNPURCHDOCNO
+              )PO_OPEN
+            ON PO_OPEN.PO_ID = PO_BS.PO_ID
+            )
+          )
+        GROUP BY ID,
+          MATERIALID
+        )STO_MM ON ITEM_SO_FC.ID = STO_MM.ID
+      )ITEM_SFS
+    LEFT JOIN
+      (SELECT ID,
+        MATERIALID,
+        SUM(MONTH_1)  AS PR_MONTH_1,
+        SUM(MONTH_2)  AS PR_MONTH_2,
+        SUM(MONTH_3)  AS PR_MONTH_3,
+        SUM(MONTH_4)  AS PR_MONTH_4,
+        SUM(MONTH_5)  AS PR_MONTH_5,
+        SUM(MONTH_6)  AS PR_MONTH_6,
+        SUM(MONTH_7)  AS PR_MONTH_7,
+        SUM(MONTH_8)  AS PR_MONTH_8,
+        SUM(MONTH_9)  AS PR_MONTH_9,
+        SUM(MONTH_10) AS PR_MONTH_10,
+        SUM(MONTH_11) AS PR_MONTH_11,
+        SUM(MONTH_12) AS PR_MONTH_12,
+        SUM(MONTH_13) AS PR_MONTH_13
+        FROM
+          (SELECT ID,
+          MATERIALID,
+          CASE --8
+            WHEN YEAR_NUMBER <= TO_CHAR(SYSDATE,'YY')
+            AND MONTH_NUMBER <= TO_CHAR(SYSDATE,'mm')
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_1,
+          CASE --9
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 1
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_2,
+          CASE --10
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 2
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_3,
+          CASE --11
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 3
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_4,
+          CASE --12
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 4
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_5,
+          CASE --1
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 7
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_6,
+          CASE
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 6
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_7,
+          CASE
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 5
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_8,
+          CASE
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 4
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_9,
+          CASE
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 3
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_10,
+          CASE
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 2
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_11,
+          CASE
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 1
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_12,
+          CASE
+            WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+            AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm')
+            THEN OPEN_PR_QTY
+            ELSE 0
+          END MONTH_13
+        FROM
+          (SELECT MATERIALID
+            ||'_'
+            ||PLANTID AS ID,
+            MATERIALID,
+            PLANTID,
+            TO_CHAR(DATEDELIVERY,'YY') AS YEAR_NUMBER,
+            TO_CHAR(DATEDELIVERY,'mm') AS MONTH_NUMBER,
+            PONUMBER,
+            PO_OPENQTY AS OPEN_PR_QTY
+          FROM INV_SAP_IO_INPUTS_DAILY
+          WHERE INPUT_TYPE = 'PURCH_REQ'
+          AND DATEDELIVERY < TO_CHAR(sysdate + 532)
+          )
+        )
+      GROUP BY ID,
+        MATERIALID
+      )PR_MM
+    ON PR_MM.ID = ITEM_SFS.ID
+    )ITEM_SFSP
+  LEFT JOIN
+    (SELECT ID,
+      MATERIALID,
+      SUM(MONTH_1)  AS PLAN_MONTH_1,
+      SUM(MONTH_2)  AS PLAN_MONTH_2,
+      SUM(MONTH_3)  AS PLAN_MONTH_3,
+      SUM(MONTH_4)  AS PLAN_MONTH_4,
+      SUM(MONTH_5)  AS PLAN_MONTH_5,
+      SUM(MONTH_6)  AS PLAN_MONTH_6,
+      SUM(MONTH_7)  AS PLAN_MONTH_7,
+      SUM(MONTH_8)  AS PLAN_MONTH_8,
+      SUM(MONTH_9)  AS PLAN_MONTH_9,
+      SUM(MONTH_10) AS PLAN_MONTH_10,
+      SUM(MONTH_11) AS PLAN_MONTH_11,
+      SUM(MONTH_12) AS PLAN_MONTH_12,
+      SUM(MONTH_13) AS PLAN_MONTH_13
+    FROM
+      (SELECT ID,
+        MATERIALID,
+        CASE --8
+          WHEN YEAR_NUMBER <= TO_CHAR(SYSDATE,'YY')
+          AND MONTH_NUMBER <= TO_CHAR(SYSDATE,'mm')
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_1,
+        CASE --9
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 1
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_2,
+        CASE --10
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 2
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_3,
+        CASE --11
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 3
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_4,
+        CASE --12
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY')
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') + 4
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_5,
+        CASE --1
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 7
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_6,
+        CASE
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 6
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_7,
+        CASE
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 5
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_8,
+        CASE
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 4
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_9,
+        CASE
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 3
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_10,
+        CASE
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 2
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_11,
+        CASE
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm') - 1
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_12,
+        CASE
+          WHEN YEAR_NUMBER = TO_CHAR(SYSDATE,'YY') + 1
+          AND MONTH_NUMBER = TO_CHAR(SYSDATE,'mm')
+          THEN OPEN_PLAN_QTY
+          ELSE 0
+        END MONTH_13
+      FROM
+        (SELECT MATERIALID
+          ||'_'
+          ||PLANTID AS ID,
+          MATERIALID,
+          PLANTID,
+          TO_CHAR(DATEDELIVERY,'YY') AS YEAR_NUMBER,
+          TO_CHAR(DATEDELIVERY,'mm') AS MONTH_NUMBER,
+          PONUMBER,
+          PO_OPENQTY AS OPEN_PLAN_QTY
+        FROM INV_SAP_IO_INPUTS_DAILY
+        WHERE INPUT_TYPE = 'PLAN_PD_PO'
+        AND DATEDELIVERY < TO_CHAR(sysdate + 532)
+        )
+      )
+    GROUP BY ID,
+      MATERIALID
+    )PLAN_MM
+  ON PLAN_MM.ID = ITEM_SFSP.ID
+  )
+WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
+
+
+
+
+
+
+
+
+
+
+SELECT * FROM (
+SELECT ID,
+  MATERIAL,
+  PLANT,
+  CATALOG_DASH,
+  SAFETY_STOCK,
+  OH_QTY,
+  STRATEGY_GRP,
+  MRP_TYPE,
+  VENDOR,
+  BU,
+  LEAD_TIME,
+  UNIT_COST,
+  MRP_CONTROLLER,
+  ULTIMATE_SOURCE,
+  OUT_MM_1,
+  OUT_MM_2,
+  OUT_MM_3,
+  OUT_MM_4,
+  OUT_MM_5,
+  OUT_MM_6,
+  OUT_MM_7,
+  OUT_MM_8,
+  OUT_MM_9,
+  OUT_MM_10,
+  OUT_MM_11,
+  OUT_MM_12,
+  OUT_MM_13,
+  IN_MM_1,
+  IN_MM_2,
+  IN_MM_3,
+  IN_MM_4,
+  IN_MM_5,
+  IN_MM_6,
+  IN_MM_7,
+  IN_MM_8,
+  IN_MM_9,
+  IN_MM_10,
+  IN_MM_11,
+  IN_MM_12,
+  IN_MM_13,
+  (OUT_MM_1 +
+  OUT_MM_2+
+  OUT_MM_3+
+  OUT_MM_4+
+  OUT_MM_5+
+  OUT_MM_6+
+  OUT_MM_7+
+  OUT_MM_8+
+  OUT_MM_9+
+  OUT_MM_10+
+  OUT_MM_11+
+  OUT_MM_12+
+  OUT_MM_13+
+  IN_MM_1+
+  IN_MM_2+
+  IN_MM_3+
+  IN_MM_4+
+  IN_MM_5+
+  IN_MM_6+
+  IN_MM_7+
+  IN_MM_8+
+  IN_MM_9+
+  IN_MM_10+
+  IN_MM_11+
+  IN_MM_12+
+  IN_MM_13) AS KEY,
+  NVL(OUT_MM_1,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_1,
+  NVL(OUT_MM_2,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_2,
+  NVL(OUT_MM_3,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_3,
+  NVL(OUT_MM_4,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_4,
+  NVL(OUT_MM_5,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_5,
+  NVL(OUT_MM_6,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_6,
+  NVL(OUT_MM_7,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_7,
+  NVL(OUT_MM_8,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_8,
+  NVL(OUT_MM_9,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_9,
+  NVL(OUT_MM_10,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_10,
+  NVL(OUT_MM_11,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_11,
+  NVL(OUT_MM_12,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_12,
+  NVL(OUT_MM_13,0) * NVL(UNIT_COST,0) AS VAL_OUT_MM_13,
+  NVL(IN_MM_1,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_1,
+  NVL(IN_MM_2,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_2,
+  NVL(IN_MM_3,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_3,
+  NVL(IN_MM_4,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_4,
+  NVL(IN_MM_5,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_5,
+  NVL(IN_MM_6,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_6,
+  NVL(IN_MM_7,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_7,
+  NVL(IN_MM_8,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_8,
+  NVL(IN_MM_9,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_9,
+  NVL(IN_MM_10,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_10,
+  NVL(IN_MM_11,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_11,
+  NVL(IN_MM_12,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_12,
+  NVL(IN_MM_13,0) * NVL(UNIT_COST,0) AS VAL_IN_MM_13
+  FROM VIEW_INV_DG_IO_TMP_22
+  ) WHERE KEY <> 0;
+  
+
+
+
+---
+SELECT DELI.ID,
+DELI.MATERIALID,
+DELI.PLANTID,
+DELI.DELIVERY_QTY_SUOM,
+BAS.UNIT_COST,
+BAS.MATL_TYPE,
+(NVL(DELI.DELIVERY_QTY_SUOM,0)*NVL(BAS.UNIT_COST,0)) AS DELIVERY_VAL
+FROM
+(SELECT 
+MATERIALID||'_'||PLANTID AS ID,
+DELIVERY,
+MATERIALID,
+DELIVERY_QTY_SUOM,
+PLANTID
+FROM INV_SAP_LIKP_LIPS_DAILY
+WHERE CREATED_ON_DATE BETWEEN TO_CHAR(SYSDATE - 22) AND TO_CHAR(SYSDATE)
+AND PLANTID                               IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
+)DELI
+LEFT JOIN
+(
+SELECT ID,
+  MATERIAL,
+  PLANT,
+  UNIT_COST,
+  MATL_TYPE
+FROM INV_SAP_PP_OPT_X
+)BAS
+ON BAS.ID = DELI.ID;
+
+SELECT * 
+FROM INV_SAP_PP_OPT_X
+WHERE PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')

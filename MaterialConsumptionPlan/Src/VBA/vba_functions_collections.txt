@@ -226,3 +226,13 @@ Dim fd As FileDialog
             Sheets(sheet_name).Range("D2:D" & rows_number).Select
 7.VBA中有个很重要的概念，当切换到不同的sheets的时候，首先做的事情是，要先激活这个sheet
 ，Sheets(sheet_name).Activate，然后在进行各项的操作的！
+
+
+8. 优雅的判定一个单元格真正为空
+            If IsEmpty(LAST_REVIEW_DATE) Then
+                sql_update_cmm_by_pl = Replace(sql_update_cmm_by_pl, "SYSDATE_2", "SYSDATE", 1)
+                Debug.Print sql_update_cmm_by_pl
+            Else
+                sql_update_cmm_by_pl = Replace(sql_update_cmm_by_pl, "SYSDATE_2", "'" & Format(LAST_REVIEW_DATE, "DD-MMM-YY") & "'", 1)
+                Debug.Print sql_update_cmm_by_pl
+            End If
