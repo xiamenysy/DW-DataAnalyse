@@ -50,6 +50,8 @@
 			ON ISPM.MATERIALID = ISMC.MATERIALID;
 		
 	3.2 VIEW_INV_SAP_PP_OPT_X with x current series
+  
+    SELECT DISTINCT MATERIAL,CATALOG_DASH,MATL_TYPE  FROM INV_SAP_PP_OPT_X;
 		DROP VIEW VIEW_INV_SAP_PP_OPT_X;
 		DROP TABLE INV_SAP_PP_OPT_X;
 		SELECT * FROM INV_SAP_PP_OPT_X;
@@ -453,6 +455,35 @@
 					  )ITEM_SOG_X
 					ON ITEM_SOG_X.SOG_ID = PP_BSC_SOG.SG_ID;
           
+          select count(*) from
+          (
+          SELECT 
+          DISTINCT
+          ITEM_SOG_X.MATERIAL,
+           ITEM_SOG_X.CATALOG_DASH,
+            ITEM_SOG_X.CATALOG_NO_DASH,
+            PP_BSC_SOG.MATL_TYPE
+            
+          FROM
+           (SELECT 
+						MATERIAL,
+						CATALOG_DASH,
+						CATALOG_NO_DASH
+					  FROM INV_SAP_ITEM_SOG_X 
+					  )ITEM_SOG_X
+            LEFT JOIN
+            (
+              SELECT 
+              DISTINCT
+              MATERIALID,
+              MATL_TYPE_MTART AS MATL_TYPE
+						FROM INV_SAP_PP_OPTIMIZATION
+            )PP_BSC_SOG
+            ON ITEM_SOG_X.MATERIAL = PP_BSC_SOG.MATERIALID
+           ) 
+           
+           
+           
 	3.3 VIEW_INV_SAP_FC55_STATS VERSBP_VERSION = '55'
 		DROP VIEW VIEW_INV_SAP_FC55_STATS;
 		SELECT * FROM VIEW_INV_SAP_FC55_STATS;
