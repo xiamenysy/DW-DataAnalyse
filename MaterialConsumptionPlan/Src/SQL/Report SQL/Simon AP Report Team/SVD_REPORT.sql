@@ -77,9 +77,10 @@ SELECT * FROM view_INV_SAP_PP_OPT_X WHERE PLANT = '5040'
 DELETE FROM INV_SAP_SVD_COMMENTS where ID = 'ID_1';
 
 --VIEW SVD REPORT
-DROP VIEW VIEW_INV_SAP_SVD_REPORT;
+DROP VIEW VIEW_INV_SAP_SVD_REPORT_U;
 CREATE TABLE INV_SAP_SVD_REPORT AS 
 SELECT * FROM VIEW_INV_SAP_SVD_REPORT;
+
 CREATE VIEW VIEW_INV_SAP_SVD_REPORT_U AS    
 SELECT SVD_V_O.ID                   AS ID,
   SVD_V_O.MATERIAL                  AS MATERIAL,
@@ -95,6 +96,7 @@ SELECT SVD_V_O.ID                   AS ID,
   SVD_V_O.FC_AVG13_WEEK_QTY         AS FC_AVG13_WEEK_QTY,
   SVD_V_O.OH_QTY                    AS OH_QTY,
   SVD_V_O.UNIT_COST                 AS UNIT_COST,
+  SVD_V_O.UNIT                      AS UNIT,
   SVD_V_O.MRP_CONTROLLER            AS MRP_CONTROLLER,
   SVD_V_O.STOCK_IN_TRANSIT_QTY      AS STOCK_IN_TRANSIT_QTY,
   SVD_V_O.TOT_OPEN_QTY              AS TOT_OPEN_QTY,
@@ -105,7 +107,7 @@ SELECT SVD_V_O.ID                   AS ID,
   SVD_V_O.TOT_NO_COMMITTED_DATE_QTY AS TOT_NO_COMMITTED_DATE_QTY,
   SVD_V_O.PRODUCTION_PLANT          AS PRODUCTION_PLANT,
   SVD_V_O.CHECK_KEY                 AS CHECK_KEY,
-  NVL(PO_OPEN_QTY.OPEN_QTY,0)              AS PO_OPEN_QTY
+  NVL(PO_OPEN_QTY.OPEN_QTY,0)       AS PO_OPEN_QTY
 FROM
   (SELECT SPPX_FC_TRIN_OPEN_NOCM.ID                                                                                                        AS ID,
     SPPX_FC_TRIN_OPEN_NOCM.MATERIAL                                                                                                        AS MATERIAL,
@@ -121,6 +123,7 @@ FROM
     NVL(SPPX_FC_TRIN_OPEN_NOCM.FC_AVG13_WEEK_QTY,0)                                                                                        AS FC_AVG13_WEEK_QTY,
     NVL(SPPX_FC_TRIN_OPEN_NOCM.OH_QTY,0)                                                                                                   AS OH_QTY,
     NVL(SPPX_FC_TRIN_OPEN_NOCM.UNIT_COST,0)                                                                                                AS UNIT_COST,
+    SPPX_FC_TRIN_OPEN_NOCM.UNIT                                                                                                            AS UNIT,
     SPPX_FC_TRIN_OPEN_NOCM.MRP_CONTROLLER                                                                                                  AS MRP_CONTROLLER,
     NVL(SPPX_FC_TRIN_OPEN_NOCM.STOCK_IN_TRANSIT_QTY,0)                                                                                     AS STOCK_IN_TRANSIT_QTY,
     NVL(SPPX_FC_TRIN_OPEN_NOCM.TOT_OPEN_QTY,0)                                                                                             AS TOT_OPEN_QTY,
@@ -146,6 +149,7 @@ FROM
       SPPX_FC_TRIN_OPEN.FC_AVG13_WEEK_QTY,
       SPPX_FC_TRIN_OPEN.OH_QTY,
       SPPX_FC_TRIN_OPEN.UNIT_COST,
+      SPPX_FC_TRIN_OPEN.UNIT,
       SPPX_FC_TRIN_OPEN.MRP_CONTROLLER,
       SPPX_FC_TRIN_OPEN.ULTIMATE_SOURCE,
       SPPX_FC_TRIN_OPEN.STOCK_IN_TRANSIT_QTY,
@@ -166,6 +170,7 @@ FROM
         SPPX_FC_TRIN.FC_AVG13_WEEK_QTY,
         SPPX_FC_TRIN.OH_QTY,
         SPPX_FC_TRIN.UNIT_COST,
+        SPPX_FC_TRIN.UNIT,
         SPPX_FC_TRIN.MRP_CONTROLLER,
         SPPX_FC_TRIN.ULTIMATE_SOURCE,
         SPPX_FC_TRIN.STOCK_IN_TRANSIT_QTY,
@@ -184,6 +189,7 @@ FROM
           PPX_FC.LEAD_TIME,
           PPX_FC.FC_AVG13_WEEK_QTY,
           PPX_FC.UNIT_COST,
+          PPX_FC.UNIT,
           PPX_FC.MRP_CONTROLLER,
           PPX_FC.OH_QTY,
           PPX_FC.ULTIMATE_SOURCE,
@@ -201,6 +207,7 @@ FROM
             SALES_PP_X.AVG13_USAGE_QTY,
             SALES_PP_X.LEAD_TIME,
             SALES_PP_X.UNIT_COST,
+            SALES_PP_X.UNIT,
             SALES_PP_X.MRP_CONTROLLER,
             FC_AVG13_WEEK.FC_AVG13_WEEK_QTY,
             SALES_PP_X.OH_QTY,
@@ -219,9 +226,10 @@ FROM
               AVG13_USAGE_QTY,
               LEAD_TIME,
               UNIT_COST,
+              UNIT,
               MRP_CONTROLLER,
               ULTIMATE_SOURCE
-            FROM INV_SAP_PP_OPT_X 
+            FROM INV_SAP_PP_OPT_X
             WHERE MATL_TYPE IN ('ZTG','ZFG')
             AND PLANT       IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140')
             )SALES_PP_X
@@ -256,7 +264,7 @@ FROM
             (SELECT EBELNPURCHDOCNO
             FROM INV_SAP_PP_PO_HISTORY
             WHERE DELIVERYCOMPLETE IS NULL
-            ) and MATERIALID = 'PN-33476' AND PLANTID = '5070'
+            )
           AND CHANGED_ON_DATE IS NULL --THIS DATA IS IMPORTANT. IT SHOW THE REAL QTY IN TRANSIT.
           GROUP BY MATERIALID,
             MATERIALID,
@@ -312,7 +320,7 @@ LEFT JOIN
     ||PLANTID         AS ID,
     SUM(COMMITTEDQTY) AS OPEN_QTY
   FROM INV_SAP_PP_PO_HISTORY
-  WHERE DELIVERYCOMPLETE IS NULL AND MATERIALID = 'PN-12175' AND PLANTID = '5040'
+  WHERE DELIVERYCOMPLETE IS NULL
   GROUP BY MATERIALID,
     PLANTID
   )PO_OPEN_QTY
@@ -340,11 +348,13 @@ SELECT SVD_BASIC.ID,
   SVD_BASIC.LEAD_TIME,
   SVD_BASIC.MRP_CONTROLLER,
   SVD_BASIC.UNIT_COST,
+  SVD_BASIC.UNIT,
   SVD_BASIC.STRATEGY_GRP,
   SVD_BASIC.SAFETY_STOCK,
   SVD_BASIC.AVG13_USAGE_QTY,
   SVD_BASIC.FC_AVG13_WEEK_QTY,
   SVD_BASIC.OH_QTY,
+  SVD_BASIC.PO_OPEN_QTY,
   SVD_BASIC.PO_NOT_SHIPPED,
   SVD_BASIC.STOCK_IN_TRANSIT_QTY,
   SVD_BASIC.TOT_OPEN_QTY,
@@ -371,12 +381,14 @@ FROM
     LEAD_TIME,
     MRP_CONTROLLER,
     UNIT_COST,
+    UNIT,
     STRATEGY_GRP,
     SAFETY_STOCK,
     AVG13_USAGE_QTY,
     FC_AVG13_WEEK_QTY,
     PRODUCTION_PLANT,
     OH_QTY,
+    NVL(PO_OPEN_QTY,0) AS PO_OPEN_QTY,
     (NVL(PO_OPEN_QTY,0) - STOCK_IN_TRANSIT_QTY) AS  PO_NOT_SHIPPED,
     STOCK_IN_TRANSIT_QTY,
     CEIL(NVL(TOT_OPEN_QTY*UNIT_COST,0)) AS TOT_OPEN_VALUE,
@@ -390,7 +402,6 @@ FROM
   WHERE CHECK_KEY  <> 0
   AND BU NOT       IN ('ACS', 'VIS', 'SFW', 'ESB', 'CCT', 'SSB', 'LVM', 'MVM', 'MVD')
   AND STRATEGY_GRP IN ('40','Z4')
-  AND ID = 'PN-12175_5040'
   )SVD_BASIC
 LEFT JOIN
   (SELECT ID,
@@ -399,7 +410,9 @@ LEFT JOIN
     LAST_UPDATE_DATE
   FROM INV_SAP_SVD_COMMENTS
   )SVD_COMM
-ON SVD_BASIC.ID = SVD_COMM.ID
+ON SVD_BASIC.ID = SVD_COMM.ID;
+
+
 5.Clear Comments TMP	
 TRUNCATE TABLE INV_SAP_SVD_COMMENTS_TMP
 6.Upload to tmp	
@@ -457,6 +470,28 @@ SELECT * FROM INV_SAP_BACKLOG_SO WHERE COMMITTED_DATE > SYSDATE + LT_1 AND  ID =
 SELECT * FROM INV_SAP_BACKLOG_SO WHERE COMMITTED_DATE IS NULL AND ID = 'id_1'
 14.DELETE COMMENTS							
 DELETE FROM INV_SAP_SVD_COMMENTS WHERE ID = 'ID_1'								
+15.STO Details
+
+SELECT * FROM
+(
+SELECT MATERIALID
+      ||'_'
+      ||PLANTID                  AS ID,
+      EBELNPURCHDOCNO            AS PO,
+      BSART_PURCHDOCTYPE         AS PO_TYPE,
+      EBELPPURCHITEMNO           AS ITEM,
+      MATERIALID                 AS MATERIAL,
+      PLANTID                    AS PLANT,
+      STRATEGY_GRP               AS STRATEGY_GRP,
+      MENGESCHEDULEDQTY          AS PURHCASE_QTY,
+      COMMITTED_DATE             AS COMMITTED_DATE,
+      BEDATSCHEDULELINEORDERDATE AS ORDER_DATE,
+      EINDTPURCHITEMDELIVDATE    AS DELIVERY_DATE,
+      SLFDTSTATDELIVERYDATE      AS START_DELIVERY_DATE,
+      BUDATPOSTINGDATE           AS LAST_GR_Date,
+      LAST_SHIP_DATE             AS LAST_GI_Date
+    FROM INV_SAP_PP_PO_HISTORY WHERE DELIVERYCOMPLETE IS NULL
+)WHERE ID = 'id_1' AND AND ETENRPURCHDELIVSCHLINE = '1';
 
 ---BackUp the Comments Every Day
 

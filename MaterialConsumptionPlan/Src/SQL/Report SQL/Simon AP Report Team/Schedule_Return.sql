@@ -467,12 +467,12 @@ FROM
                 VENDOR_KEY,
                 MATL_TYPE,
                 VENDOR_ITEM
-              FROM INV_SAP_PP_OPT_X
+                FROM INV_SAP_PP_OPT_X
               )RETURN_PLANT
             ON RETURN_PLANT.TMP_ID = SCHED_RE.TMP_ID
             )RE_BS
           LEFT JOIN
-            ( SELECT ID, STRATEGY_GRP, OH_QTY, AVG13_USAGE_QTY FROM INV_SAP_PP_OPT_X
+            (SELECT ID, STRATEGY_GRP, OH_QTY, AVG13_USAGE_QTY FROM INV_SAP_PP_OPT_X
             )VENDOR_PLANT
           ON VENDOR_PLANT.ID = RE_BS.RE_VENDOR_ITEM
           )RE_BSV
