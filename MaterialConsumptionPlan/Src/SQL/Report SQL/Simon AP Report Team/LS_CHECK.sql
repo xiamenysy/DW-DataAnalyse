@@ -1,6 +1,8 @@
---DATE:08132014
---AUTHOR:HUANG MOYUE
---LS CHECK
+--Porject Name: LS CHECK
+--Author: Huang Moyue 
+--Mail: mhuang1@ra.rockwell.com
+--Date:09/26/2014
+--Summary: LOT SIZE CHECK. 
 
 SELECT PLANT,
   MATERIAL,

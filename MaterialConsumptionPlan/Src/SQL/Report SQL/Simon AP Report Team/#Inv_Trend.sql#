@@ -1,0 +1,667 @@
+--DATE:08142014
+--AUTHOR:HUANG MOYUE
+--INV TREND
+
+--View of the plant inventory
+CREATE VIEW VIEW_INV_SAP_INV_BY_PLANT AS
+SELECT MATERIALID,
+  PLANTID,
+  SUM(OH_QTY) AS OH_QTY
+FROM INV_SAP_INVENTORY_BY_PLANT
+GROUP BY
+MATERIALID,
+PLANTID;
+
+SELECT * FROM INV_SAP_INVENTORY_BY_PLANT;
+SELECT * FROM INV_SAP_INV_REC WHERE REC_DATE > SYSDATE - 2;
+
+select * From VIEW_INV_SAP_INV_TREND
+
+DROP VIEW VIEW_INV_SAP_INV_TREND;
+CREATE VIEW VIEW_INV_SAP_INV_TREND AS
+SELECT 
+  SYSDATE AS REC_DATE,
+  CUSTOMER_SOP.ID                                                                                AS ID,
+  CUSTOMER_SOP.PROC_TYPE                                                                              AS PROC_TYPE,
+  CUSTOMER_SOP.PLANT                                                                                  AS PLANT,
+  CUSTOMER_SOP.MATERIAL                                                                               AS MATERIAL,
+  CUSTOMER_SOP.CATALOG_DASH                                                                           AS CATALOG_DASH,
+  CUSTOMER_SOP.MAT_DESC                                                                               AS MAT_DESC,
+  CUSTOMER_SOP.BU                                                                                     AS BU,
+  CUSTOMER_SOP.UNIT_COST                                                                              AS UNIT_COST,
+  CUSTOMER_SOP.STRATEGY_GRP                                                                           AS STRATEGY_GRP,
+  CUSTOMER_SOP.SAFETY_STOCK                                                                           AS SAFETY_STOCK,
+  CUSTOMER_SOP.LEAD_TIME                                                                              AS LEAD_TIME,
+  CUSTOMER_SOP.MRP_CONTROLLER                                                                         AS MRP_CONTROLLER,
+  CUSTOMER_SOP.PURCH_GROUP                                                                            AS PURCH_GROUP,
+  CUSTOMER_SOP.MATL_TYPE                                                                              AS MATL_TYPE ,
+  CUSTOMER_SOP.MRP_TYPE                                                                               AS MRP_TYPE,
+  CUSTOMER_SOP.AVG13_USAGE_QTY                                                                        AS AVG13_USAGE_QTY,
+  CUSTOMER_SOP.FC_AVG13_WEEK_QTY                                                                      AS FC_AVG13_WEEK_QTY,
+  CUSTOMER_SOP.AVG26_USAGE_QTY                                                                        AS AVG26_USAGE_QTY,
+  CUSTOMER_SOP.FC_AVG26_WEEK_QTY                                                                      AS FC_AVG26_WEEK_QTY,
+  CUSTOMER_SOP.TOT_OPEN_QTY                                                                           AS TOT_OPEN_QTY,
+  NVL(CUSTOMER_SOP.UNIT_COST,0)*NVL(CUSTOMER_SOP.TOT_OPEN_QTY,0)                                      AS SO_OPEN_VAL,
+  CUSTOMER_SOP.PO_OPEN_QTY_ALL                                                                        AS PO_OPEN_QTY_ALL,
+  CUSTOMER_SOP.STOCK_IN_TRANSIT_QTY                                                                   AS STOCK_IN_TRANSIT_QTY,
+  NVL(CUSTOMER_SOP.UNIT_COST,0)*NVL(CUSTOMER_SOP.PO_OPEN_QTY_ALL,0)                                   AS PO_OPEN_VAL,
+  NVL(CUSTOMER_SOP.UNIT_COST,0)*NVL(CUSTOMER_SOP.STOCK_IN_TRANSIT_QTY,0)                              AS SIT_VAL,
+  INV_STATS.TOTAL_QTY                                                                                 AS INV_TOTAL_QTY,
+  NVL(CUSTOMER_SOP.UNIT_COST,0)*NVL(INV_STATS.TOTAL_QTY,0)                                            AS INV_TOTAL_VAL,
+  (NVL(INV_STATS.TOTAL_QTY,0)  +NVL(CUSTOMER_SOP.PO_OPEN_QTY_ALL,0)+NVL(CUSTOMER_SOP.TOT_OPEN_QTY,0)) AS KEY
+FROM
+  (SELECT CUSTOMER_SO.ID          AS ID,
+    CUSTOMER_SO.PROC_TYPE         AS PROC_TYPE,
+    CUSTOMER_SO.PLANT             AS PLANT,
+    CUSTOMER_SO.MATERIAL          AS MATERIAL,
+    CUSTOMER_SO.CATALOG_DASH      AS CATALOG_DASH,
+    CUSTOMER_SO.MAT_DESC          AS MAT_DESC,
+    CUSTOMER_SO.PROD_BU           AS BU,
+    CUSTOMER_SO.UNIT_COST         AS UNIT_COST,
+    CUSTOMER_SO.STRATEGY_GRP      AS STRATEGY_GRP,
+    CUSTOMER_SO.SAFETY_STOCK      AS SAFETY_STOCK,
+    CUSTOMER_SO.LEAD_TIME         AS LEAD_TIME,
+    CUSTOMER_SO.MRP_CONTROLLER    AS MRP_CONTROLLER,
+    CUSTOMER_SO.PURCH_GROUP       AS PURCH_GROUP,
+    CUSTOMER_SO.MATL_TYPE         AS MATL_TYPE ,
+    CUSTOMER_SO.MRP_TYPE          AS MRP_TYPE,
+    CUSTOMER_SO.AVG13_USAGE_QTY   AS AVG13_USAGE_QTY,
+    CUSTOMER_SO.FC_AVG13_WEEK_QTY AS FC_AVG13_WEEK_QTY,
+    CUSTOMER_SO.AVG26_USAGE_QTY   AS AVG26_USAGE_QTY,
+    CUSTOMER_SO.FC_AVG26_WEEK_QTY AS FC_AVG26_WEEK_QTY,
+    CUSTOMER_SO.TOT_OPEN_QTY      AS TOT_OPEN_QTY,
+    PO_STATS.PO_OPEN_QTY_ALL      AS PO_OPEN_QTY_ALL,
+    PO_STATS.STOCK_IN_TRANSIT_QTY AS STOCK_IN_TRANSIT_QTY
+  FROM
+    (SELECT CUSTOMER.ID,
+      CUSTOMER.PROC_TYPE,
+      CUSTOMER.PLANT,
+      CUSTOMER.MATERIAL,
+      CUSTOMER.CATALOG_DASH,
+      CUSTOMER.MAT_DESC,
+      CUSTOMER.PROD_BU,
+      CUSTOMER.UNIT_COST,
+      CUSTOMER.STRATEGY_GRP,
+      CUSTOMER.SAFETY_STOCK,
+      CUSTOMER.LEAD_TIME,
+      CUSTOMER.MRP_CONTROLLER,
+      CUSTOMER.PURCH_GROUP,
+      CUSTOMER.MATL_TYPE,
+      CUSTOMER.MRP_TYPE,
+      CUSTOMER.AVG13_USAGE_QTY,
+      CUSTOMER.FC_AVG13_WEEK_QTY,
+      CUSTOMER.AVG26_USAGE_QTY,
+      CUSTOMER.FC_AVG26_WEEK_QTY,
+      SO_STATS.TOT_OPEN_QTY
+    FROM
+      (SELECT ID,
+        MATERIAL,
+        CATALOG_DASH,
+        PLANT,
+        MAT_DESC,
+        SAFETY_STOCK,
+        UNIT,
+        PROC_TYPE,
+        UNIT_COST,
+        PROD_BU,
+        STRATEGY_GRP,
+        MRP_TYPE,
+        MRP_CONTROLLER,
+        PURCH_GROUP,
+        MATL_TYPE,
+        LEAD_TIME,
+        AVG26_USAGE_QTY,
+        AVG13_USAGE_QTY,
+        FC_AVG13_WEEK_QTY,
+        FC_AVG26_WEEK_QTY
+      FROM VIEW_INV_SAP_FC00_STATS
+      )CUSTOMER
+    LEFT JOIN
+      (SELECT ID, TOT_OPEN_QTY FROM VIEW_INV_SAP_ITEM_SO_STAT_U
+      )SO_STATS
+    ON CUSTOMER.ID = SO_STATS.ID
+    )CUSTOMER_SO
+  LEFT JOIN
+    (SELECT ID,
+      SUM(PO_OPEN_QTY) AS PO_OPEN_QTY_ALL,
+      STOCK_IN_TRANSIT_QTY --Add Here
+    FROM VIEW_INV_SAP_BACKLOG_PO
+    GROUP BY ID,
+      STOCK_IN_TRANSIT_QTY
+    )PO_STATS
+  ON PO_STATS.ID = CUSTOMER_SO.ID
+  )CUSTOMER_SOP
+LEFT JOIN
+  (SELECT ID,TOTAL_QTY FROM VIEW_INV_SAP_BACKLOG_INV
+  )INV_STATS
+ON INV_STATS.ID = CUSTOMER_SOP.ID;
+
+--Rec this view every day
+DROP TABLE INV_SAP_INV_TREND;
+CREATE TABLE INV_SAP_INV_TREND AS 
+SELECT *
+FROM VIEW_INV_SAP_INV_TREND
+WHERE KEY <> 0;
+
+---hst inv record
+SELECT * FROM INV_SAP_INV_REC;
+DROP TABLE INV_SAP_INV_REC
+TRUNCATE TABLE INV_SAP_INV_REC;
+CREATE TABLE INV_SAP_INV_REC_TMP AS SELECT * FROM INV_SAP_INV_REC;
+DROP TABLE INV_SAP_INV_REC_TMP;
+
+--Just the tmp table that change the table structure
+INSERT INTO INV_SAP_INV_REC_TMP
+SELECT INV_BS.INV_ID,
+  INV_BS.ID,
+  INV_BS.REC_DATE,
+  INV_BS.PLANTID,
+  INV_BS.MATERIAL,
+  INV_BS.CATALOG_DASH,
+  INV_BS.SAFETY_STOCK,
+  INV_BS.UNIT_COST,
+  PP.STRATEGY_GRP,
+  PP.PROD_BU,
+  PP.PROD_FAM,
+  INV_BS.MATL_TYPE,
+  INV_BS.OH_QTY,
+  INV_BS.MIN_INV,
+  INV_BS.TARGET_INV,
+  INV_BS.MAX_INV,
+  INV_BS.OH_VAL,
+  INV_BS.MIN_INV_VAL,
+  INV_BS.TARGET_INV_VAL,
+  INV_BS.MAX_INV_VAL,
+  INV_BS.OVER_MAX_VAL
+FROM
+  (SELECT INV_ID,
+    ID,
+    REC_DATE,
+    PLANTID,
+    MATERIAL,
+    CATALOG_DASH,
+    SAFETY_STOCK,
+    UNIT_COST,
+    MATL_TYPE,
+    OH_QTY,
+    MIN_INV,
+    TARGET_INV,
+    MAX_INV,
+    OH_VAL,
+    MIN_INV_VAL,
+    TARGET_INV_VAL,
+    MAX_INV_VAL,
+    OVER_MAX_VAL
+  FROM INV_SAP_INV_REC 
+  )INV_BS
+LEFT JOIN
+  ( SELECT ID,STRATEGY_GRP, PROD_BU, PROD_FAM FROM INV_SAP_PP_OPT_X
+  )PP
+ON PP.ID = INV_BS.ID;
+  
+SELECT * FROM INV_SAP_INV_SUM_STATS WHERE SNAPSHOT_DATE between SYSDATE - 1 and sysdate;
+DELETE FROM INV_SAP_INV_REC WHERE REC_DATE between SYSDATE - 1 and sysdate;
+DELETE FROM INV_SAP_INV_SUM_STATS WHERE SNAPSHOT_DATE between SYSDATE - 1 and sysdate;
+SELECT * FROM INV_SAP_INV_REC WHERE REC_DATE between SYSDATE - 2 and sysdate - 1
+CREATE TABLE INV_SAP_INV_REC_0923 AS SELECT * FROM INV_SAP_INV_REC;
+SELECT (SYSDATE-1) AS D FROM INV_SAP_INV_REC
+
+--Time:09282014
+------------------------------------------------------------------------------------------------------------------------
+--Inv Daily Provide the Chart Data
+SELECT REC_DATE_DATE,
+  PLANT,
+  STRATEGY_GRP,
+  PROD_BU,
+  MATL_TYPE,
+  SUM(MIN_INV_VAL)    AS TOT_MIN_INV_VAL,
+  SUM(TARGET_INV_VAL) AS TOT_TARGET_INV_VAL,
+  SUM(MAX_INV_VAL)    AS TOT_MAX_INV_VAL,
+  SUM(OH_VAL)         AS TOT_OH_VAL,
+  SUM(SIT_VAL)        AS TOT_MIN_SIT_VAL
+FROM
+  (SELECT INV_REC.INV_ID                                             AS ID,
+    INV_REC.REC_DATE_DATE                                            AS REC_DATE_DATE,
+    INV_REC.PLANT                                                    AS PLANT,
+    INV_REC.STRATEGY_GRP                                             AS STRATEGY_GRP,
+    INV_REC.PROD_BU                                                  AS PROD_BU,
+    INV_REC.MATL_TYPE                                                AS MATL_TYPE,
+    INV_REC.MIN_INV_VAL                                              AS MIN_INV_VAL,
+    INV_REC.TARGET_INV_VAL                                           AS TARGET_INV_VAL,
+    INV_REC.MAX_INV_VAL                                              AS MAX_INV_VAL,
+    INV_REC.OH_VAL                                                   AS OH_VAL,
+    CEIL(CEIL(INV_SIT.STOCK_IN_TRANSIT_QTY)*CEIL(INV_REC.UNIT_COST)) AS SIT_VAL
+  FROM
+    (SELECT INV_ID,
+      TO_CHAR(REC_DATE,'MM/DD/YYYY') AS REC_DATE_DATE,
+      TO_CHAR(REC_DATE,'D')          AS REC_DATE_WK,
+      PLANTID                        AS PLANT,
+      STRATEGY_GRP                   AS STRATEGY_GRP,
+      PROD_BU                        AS PROD_BU,
+      UNIT_COST                      AS UNIT_COST,
+      MATL_TYPE                      AS MATL_TYPE,
+      MIN_INV_VAL                    AS MIN_INV_VAL,
+      TARGET_INV_VAL                 AS TARGET_INV_VAL,
+      MAX_INV_VAL                    AS MAX_INV_VAL,
+      OH_VAL                         AS OH_VAL
+    FROM INV_SAP_INV_REC
+    WHERE OH_QTY <> 0 AND REC_DATE BETWEEN TO_CHAR(SYSDATE - 30) AND TO_CHAR(SYSDATE + 1)
+    )INV_REC
+  LEFT JOIN
+    (SELECT SNAPSHOT_DATE
+      ||'_'
+      ||MATERIAL
+      ||'_'
+      ||PLANT AS ID,
+      STOCK_IN_TRANSIT_QTY
+    FROM INV_SAP_INV_SUM_STATS
+    )INV_SIT
+  ON INV_REC.INV_ID = INV_SIT.ID
+  )
+GROUP BY REC_DATE_DATE,
+  PLANT,
+  STRATEGY_GRP,
+  PROD_BU,
+  MATL_TYPE
+  
+  
+"SELECT INVTO.REC_DATE,
+  INVTO.PLANTID,
+  INVTO.MATERIAL,
+  INVTO.CATALOG_DASH,
+  INVTO.STRATEGY_GRP,
+  INVTO.SAFETY_STOCK,
+  INVTO.UNIT_COST,
+  INVTO.MATL_TYPE,
+  INVTO.OH_QTY,
+  INVTO.MIN_INV,
+  INVTO.TARGET_INV,
+  INVTO.MAX_INV,
+  INVTO.OH_VAL,
+  CEIL(NVL(INVTO.OH_VAL,0) - NVL(INVTO.UNIT_COST,0)*NVL(INV_PRE.PRE_OH_WK1, 0)) AS DIFF,
+  INVTO.MIN_INV_VAL,
+  INVTO.TARGET_INV_VAL,
+  INVTO.MAX_INV_VAL,
+  INVTO.OVER_MAX_VAL,
+  CEIL(NVL(INVTO.UNIT_COST,0)*NVL(INV_PRE.PRE_OH_WK1, 0)) AS PRE_OH_WK1_VAL,
+  INV_PRE.PRE_OH_WK1,
+  INV_PRE.PRE_OH_WK2,
+  INV_PRE.PRE_OH_WK3,
+  INV_PRE.PRE_OH_WK4,
+  INV_PRE.PRE_OH_WK5,
+  INV_PRE.PRE_OH_WK6,
+  INV_PRE.PRE_OH_WK7,
+  INV_PRE.PRE_OH_WK8,
+  INV_PRE.PRE_OH_WK9,
+  INV_PRE.PRE_OH_WK10,
+  INV_PRE.PRE_OH_WK11,
+  INV_PRE.PRE_OH_WK12
+FROM
+  (SELECT ID,
+    REC_DATE,
+    PLANTID,
+    MATERIAL,
+    CATALOG_DASH,
+    SAFETY_STOCK,
+    UNIT_COST,
+    STRATEGY_GRP,
+    MATL_TYPE,
+    OH_QTY,
+    MIN_INV,
+    TARGET_INV,
+    MAX_INV,
+    OH_VAL,
+    MIN_INV_VAL,
+    TARGET_INV_VAL,
+    MAX_INV_VAL,
+    OVER_MAX_VAL
+  FROM INV_SAP_INV_REC
+  WHERE REC_DATE BETWEEN TO_CHAR(SYSDATE) AND TO_CHAR(SYSDATE + 1)
+  AND OH_QTY <> 0
+  )INVTO
+LEFT JOIN
+  (SELECT ID,
+    SUM(PRE_OH_WEEK1)  AS PRE_OH_WK1,
+    SUM(PRE_OH_WEEK2)  AS PRE_OH_WK2,
+    SUM(PRE_OH_WEEK3)  AS PRE_OH_WK3,
+    SUM(PRE_OH_WEEK4)  AS PRE_OH_WK4,
+    SUM(PRE_OH_WEEK5)  AS PRE_OH_WK5,
+    SUM(PRE_OH_WEEK6)  AS PRE_OH_WK6,
+    SUM(PRE_OH_WEEK7)  AS PRE_OH_WK7,
+    SUM(PRE_OH_WEEK8)  AS PRE_OH_WK8,
+    SUM(PRE_OH_WEEK9)  AS PRE_OH_WK9,
+    SUM(PRE_OH_WEEK10) AS PRE_OH_WK10,
+    SUM(PRE_OH_WEEK11) AS PRE_OH_WK11,
+    SUM(PRE_OH_WEEK12) AS PRE_OH_WK12
+  FROM
+    (SELECT ID,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 7) AND TO_CHAR(SYSDATE - 6)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK1,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 14) AND TO_CHAR(SYSDATE - 13)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK2,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 21) AND TO_CHAR(SYSDATE - 20)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK3,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 28) AND TO_CHAR(SYSDATE - 27)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK4,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 35) AND TO_CHAR(SYSDATE - 34)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK5,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 42) AND TO_CHAR(SYSDATE - 41)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK6,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 49) AND TO_CHAR(SYSDATE - 48)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK7,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 56) AND TO_CHAR(SYSDATE - 55)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK8,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 63) AND TO_CHAR(SYSDATE - 62)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK9,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 70) AND TO_CHAR(SYSDATE - 69)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK10,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 77) AND TO_CHAR(SYSDATE - 76)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK11,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 84) AND TO_CHAR(SYSDATE - 83)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK12
+    FROM
+      (SELECT ID,
+        PRE_REC_DATE,
+        PRE_OH_VAL
+      FROM
+        (SELECT ID,
+          REC_DATE              AS PRE_REC_DATE,
+          TO_CHAR(REC_DATE,'D') AS REC_DATE_WK,
+          OH_QTY                AS PRE_OH_VAL
+        FROM INV_SAP_INV_REC
+        WHERE OH_QTY <> 0
+        )
+      WHERE REC_DATE_WK = '2'
+      )
+    )
+  GROUP BY ID
+  )INV_PRE
+ON INV_PRE.ID = INVTO.ID"
+
+
+
+--Weekly
+SELECT REC_DATE_DATE,
+  PLANT,
+  STRATEGY_GRP,
+  PROD_BU,
+  MATL_TYPE,
+  TOT_MIN_INV_VAL,
+  TOT_TARGET_INV_VAL,
+  TOT_MAX_INV_VAL,
+  TOT_OH_VAL,
+  TOT_MIN_SIT_VAL
+FROM
+  (SELECT REC_DATE_DATE,
+    REC_DATE_WK,
+    PLANT,
+    STRATEGY_GRP,
+    PROD_BU,
+    MATL_TYPE,
+    SUM(MIN_INV_VAL)    AS TOT_MIN_INV_VAL,
+    SUM(TARGET_INV_VAL) AS TOT_TARGET_INV_VAL,
+    SUM(MAX_INV_VAL)    AS TOT_MAX_INV_VAL,
+    SUM(OH_VAL)         AS TOT_OH_VAL,
+    SUM(SIT_VAL)        AS TOT_MIN_SIT_VAL
+  FROM
+    (SELECT INV_REC.INV_ID                                             AS ID,
+      INV_REC.REC_DATE_DATE                                            AS REC_DATE_DATE,
+      INV_REC.REC_DATE_WK                                              AS REC_DATE_WK,
+      INV_REC.PLANT                                                    AS PLANT,
+      INV_REC.STRATEGY_GRP                                             AS STRATEGY_GRP,
+      INV_REC.PROD_BU                                                  AS PROD_BU,
+      INV_REC.MATL_TYPE                                                AS MATL_TYPE,
+      INV_REC.MIN_INV_VAL                                              AS MIN_INV_VAL,
+      INV_REC.TARGET_INV_VAL                                           AS TARGET_INV_VAL,
+      INV_REC.MAX_INV_VAL                                              AS MAX_INV_VAL,
+      INV_REC.OH_VAL                                                   AS OH_VAL,
+      CEIL(CEIL(INV_SIT.STOCK_IN_TRANSIT_QTY)*CEIL(INV_REC.UNIT_COST)) AS SIT_VAL
+    FROM
+      (SELECT INV_ID,
+        TO_CHAR(REC_DATE,'MM/DD/YYYY') AS REC_DATE_DATE,
+        TO_CHAR(REC_DATE,'D')          AS REC_DATE_WK,
+        PLANTID                        AS PLANT,
+        STRATEGY_GRP                   AS STRATEGY_GRP,
+        PROD_BU                        AS PROD_BU,
+        UNIT_COST                      AS UNIT_COST,
+        MATL_TYPE                      AS MATL_TYPE,
+        MIN_INV_VAL                    AS MIN_INV_VAL,
+        TARGET_INV_VAL                 AS TARGET_INV_VAL,
+        MAX_INV_VAL                    AS MAX_INV_VAL,
+        OH_VAL                         AS OH_VAL
+      FROM INV_SAP_INV_REC
+      WHERE OH_QTY <> 0
+      )INV_REC
+    LEFT JOIN
+      (SELECT SNAPSHOT_DATE
+        ||'_'
+        ||MATERIAL
+        ||'_'
+        ||PLANT AS ID,
+        STOCK_IN_TRANSIT_QTY
+      FROM INV_SAP_INV_SUM_STATS
+      )INV_SIT
+    ON INV_REC.INV_ID = INV_SIT.ID
+    )
+  GROUP BY REC_DATE_DATE,
+    REC_DATE_WK,
+    PLANT,
+    STRATEGY_GRP,
+    PROD_BU,
+    MATL_TYPE
+  )
+WHERE REC_DATE_WK = '2';
+
+---INV Details
+SELECT INVTO.REC_DATE,
+  INVTO.PLANTID,
+  INVTO.MATERIAL,
+  INVTO.CATALOG_DASH,
+  INVTO.STRATEGY_GRP,
+  INVTO.SAFETY_STOCK,
+  INVTO.UNIT_COST,
+  INVTO.MATL_TYPE,
+  INVTO.OH_QTY,
+  INVTO.MIN_INV,
+  INVTO.TARGET_INV,
+  INVTO.MAX_INV,
+  INVTO.OH_VAL,
+  CEIL(NVL(INVTO.OH_VAL,0) - NVL(INVTO.UNIT_COST,0)*NVL(INV_PRE.PRE_OH_WK1, 0)) AS DIFF,
+  INVTO.MIN_INV_VAL,
+  INVTO.TARGET_INV_VAL,
+  INVTO.MAX_INV_VAL,
+  INVTO.OVER_MAX_VAL,
+  CEIL(NVL(INVTO.UNIT_COST,0)*NVL(INV_PRE.PRE_OH_WK1, 0)) AS PRE_OH_WK1_VAL,
+  INV_PRE.PRE_OH_WK1,
+  INV_PRE.PRE_OH_WK2,
+  INV_PRE.PRE_OH_WK3,
+  INV_PRE.PRE_OH_WK4,
+  INV_PRE.PRE_OH_WK5,
+  INV_PRE.PRE_OH_WK6,
+  INV_PRE.PRE_OH_WK7,
+  INV_PRE.PRE_OH_WK8,
+  INV_PRE.PRE_OH_WK9,
+  INV_PRE.PRE_OH_WK10,
+  INV_PRE.PRE_OH_WK11,
+  INV_PRE.PRE_OH_WK12
+FROM
+  (SELECT ID,
+    REC_DATE,
+    PLANTID,
+    MATERIAL,
+    CATALOG_DASH,
+    SAFETY_STOCK,
+    UNIT_COST,
+    STRATEGY_GRP,
+    MATL_TYPE,
+    OH_QTY,
+    MIN_INV,
+    TARGET_INV,
+    MAX_INV,
+    OH_VAL,
+    MIN_INV_VAL,
+    TARGET_INV_VAL,
+    MAX_INV_VAL,
+    OVER_MAX_VAL
+  FROM INV_SAP_INV_REC
+  WHERE REC_DATE BETWEEN TO_CHAR(SYSDATE) AND TO_CHAR(SYSDATE + 1)
+  AND OH_QTY <> 0
+  )INVTO
+LEFT JOIN
+  (SELECT ID,
+    SUM(PRE_OH_WEEK1)  AS PRE_OH_WK1,
+    SUM(PRE_OH_WEEK2)  AS PRE_OH_WK2,
+    SUM(PRE_OH_WEEK3)  AS PRE_OH_WK3,
+    SUM(PRE_OH_WEEK4)  AS PRE_OH_WK4,
+    SUM(PRE_OH_WEEK5)  AS PRE_OH_WK5,
+    SUM(PRE_OH_WEEK6)  AS PRE_OH_WK6,
+    SUM(PRE_OH_WEEK7)  AS PRE_OH_WK7,
+    SUM(PRE_OH_WEEK8)  AS PRE_OH_WK8,
+    SUM(PRE_OH_WEEK9)  AS PRE_OH_WK9,
+    SUM(PRE_OH_WEEK10) AS PRE_OH_WK10,
+    SUM(PRE_OH_WEEK11) AS PRE_OH_WK11,
+    SUM(PRE_OH_WEEK12) AS PRE_OH_WK12
+  FROM
+    (SELECT ID,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 7) AND TO_CHAR(SYSDATE - 6)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK1,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 14) AND TO_CHAR(SYSDATE - 13)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK2,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 21) AND TO_CHAR(SYSDATE - 20)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK3,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 28) AND TO_CHAR(SYSDATE - 27)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK4,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 35) AND TO_CHAR(SYSDATE - 34)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK5,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 42) AND TO_CHAR(SYSDATE - 41)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK6,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 49) AND TO_CHAR(SYSDATE - 48)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK7,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 56) AND TO_CHAR(SYSDATE - 55)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK8,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 63) AND TO_CHAR(SYSDATE - 62)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK9,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 70) AND TO_CHAR(SYSDATE - 69)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK10,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 77) AND TO_CHAR(SYSDATE - 76)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK11,
+      CASE
+        WHEN PRE_REC_DATE BETWEEN TO_CHAR(SYSDATE - 84) AND TO_CHAR(SYSDATE - 83)
+        THEN PRE_OH_VAL
+        ELSE 0
+      END PRE_OH_WEEK12
+    FROM
+      (SELECT ID,
+        PRE_REC_DATE,
+        PRE_OH_VAL
+      FROM
+        (SELECT ID,
+          REC_DATE              AS PRE_REC_DATE,
+          TO_CHAR(REC_DATE,'D') AS REC_DATE_WK,
+          OH_QTY                AS PRE_OH_VAL
+        FROM INV_SAP_INV_REC
+        WHERE OH_QTY <> 0
+        )
+      WHERE REC_DATE_WK = '2'
+      )
+    )
+  GROUP BY ID
+  )INV_PRE
+ON INV_PRE.ID = INVTO.ID;
+    
+---Inv Sum
+SELECT PROC_TYPE,
+  PLANT,
+  MATERIAL,
+  CATALOG_DASH,
+  BU,
+  CEIL(NVL(UNIT_COST,0)),
+  STRATEGY_GRP,
+  SAFETY_STOCK,
+  LEAD_TIME,
+  MATL_TYPE,
+  MRP_TYPE,
+  NVL(AVG13_USAGE_QTY,0),
+  NVL(FC_AVG13_WEEK_QTY,0),
+  NVL(AVG26_USAGE_QTY,0),
+  NVL(FC_AVG26_WEEK_QTY,0),
+  NVL(TOT_OPEN_QTY,0),
+  CEIL(NVL(SO_OPEN_VAL,0)),
+  CEIL(NVL(PO_OPEN_QTY_ALL,0)),
+  NVL(STOCK_IN_TRANSIT_QTY,0),
+  CEIL(NVL(PO_OPEN_VAL,0)),
+  CEIL(NVL(SIT_VAL,0)),
+  NVL(INV_TOTAL_QTY,0),
+  CEIL(NVL(INV_TOTAL_VAL,0))
+FROM VIEW_INV_SAP_INV_TREND
+WHERE KEY <> 0
+AND PLANT IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140','5130','5150','5180'); 
