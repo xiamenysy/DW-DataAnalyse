@@ -1,8 +1,32 @@
---RiskBuy
---Date:09302014
---Huang Moyue
-
+--Porject Name: Basic Function View
+--Author: Huang Moyue 
+--Mail: mhuang1@ra.rockwell.com
+--Date:09/26/2014
+--Summary: Automation Files Center Job Logs and set up process
 --The first vesion of risk buy
+
+----Upload Return Item Details
+SELECT REPLACE(RETURN_MATL, '-') AS MATL_R FROM INV_SAP_RISK_BUY;
+
+TRUNCATE TABLE INV_SAP_RISK_BUY;
+
+INSERT INTO INV_SAP_RISK_BUY(
+PLANT,
+RB_MATL,
+RB_QTY
+) VALUES ('PLANT_1',
+'RB_MATL_1',
+'RB_QTY_1'
+);
+
+------------------------------------------------------------------------------------------------------------------------
+
+SELECT DISTINCT
+      MATERIAL,
+      CATALOG_DASH,
+      MATL_TYPE
+    FROM INV_SAP_PP_OPT_X;
+
 
 SELECT KS_AP.ID            AS ID,
   KS_AP.PLANT              AS PLANT,
@@ -134,13 +158,190 @@ LEFT JOIN
   )VENDOR
 ON VENDOR.ID = REQ_AP_SGU.REQ_VENDOR_ITEM;
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
+CREATE VIEW VIEW_INV_SAP_RISK_BUY AS
+SELECT REQ_AP_SGU.REQ_ID                                                 AS REQ_ID,
+  REQ_AP_SGU.REQ_PLANT                                                   AS REQ_PLANT,
+  REQ_AP_SGU.REQ_MATERIAL                                                AS REQ_MATERIAL,
+  REQ_AP_SGU.REQ_AVG26_USAGE_QTY                                         AS REQ_AVG26_USAGE_QTY,
+  REQ_AP_SGU.REQ_D_CHAIN_BLK                                             AS REQ_D_CHAIN_BLK,
+  REQ_AP_SGU.REQ_STRATEGY_GRP                                            AS REQ_STRATEGY_GRP,
+  REQ_AP_SGU.MRP_TYPE                                                    AS MRP_TYPE,
+  REQ_AP_SGU.REQ_VENDOR_ITEM                                             AS REQ_VENDOR_ITEM,
+  NVL((REQ_AP_SGU.APT_AVG26_USAGE_QTY-REQ_AP_SGU.REQ_AVG26_USAGE_QTY),0) AS APT_AVG26_USAGE_QTY,
+  REQ_AP_SGU.REQ_UNIT_COST                                               AS REQ_UNIT_COST,
+  REQ_AP_SGU.AP_SG_CHECK                                                 AS AP_SG_CHECK,
+  VENDOR.AVG26_USAGE_QTY                                                 AS VEN_AVG26_USG_QTY,
+  VENDOR.STRATEGY_GRP                                                    AS VEN_STRATEGY_GRP
+FROM
+  (SELECT REQ_AP_USG.REQ_ID        AS REQ_ID,
+    REQ_AP_USG.REQ_PLANT           AS REQ_PLANT,
+    REQ_AP_USG.REQ_MATERIAL        AS REQ_MATERIAL,
+    REQ_AP_USG.REQ_AVG26_USAGE_QTY AS REQ_AVG26_USAGE_QTY,
+    REQ_AP_USG.REQ_D_CHAIN_BLK     AS REQ_D_CHAIN_BLK,
+    REQ_AP_USG.REQ_STRATEGY_GRP    AS REQ_STRATEGY_GRP,
+    REQ_AP_USG.MRP_TYPE            AS MRP_TYPE,
+    REQ_AP_USG.REQ_UNIT_COST       AS REQ_UNIT_COST,
+    REQ_AP_USG.REQ_VENDOR_ITEM     AS REQ_VENDOR_ITEM,
+    REQ_AP_USG.APT_AVG26_USAGE_QTY AS APT_AVG26_USAGE_QTY,
+    AP_SG.SG_CHECK                 AS AP_SG_CHECK
+  FROM
+    (SELECT REQ_PLANT.ID              AS REQ_ID,
+      REQ_PLANT.PLANT                 AS REQ_PLANT,
+      REQ_PLANT.MATERIAL              AS REQ_MATERIAL,
+      REQ_PLANT.AVG26_USAGE_QTY       AS REQ_AVG26_USAGE_QTY,
+      REQ_PLANT.D_CHAIN_BLK           AS REQ_D_CHAIN_BLK,
+      REQ_PLANT.STRATEGY_GRP          AS REQ_STRATEGY_GRP,
+      REQ_PLANT.MRP_TYPE              AS MRP_TYPE,
+      REQ_PLANT.UNIT_COST             AS REQ_UNIT_COST,
+      REQ_PLANT.VENDOR_ITEM           AS REQ_VENDOR_ITEM,
+      AP_USAGE.TOT_AP_AVG26_USAGE_QTY AS APT_AVG26_USAGE_QTY
+    FROM
+      (SELECT ID,
+        PLANT,
+        MATERIAL,
+        AVG26_USAGE_QTY,
+        D_CHAIN_BLK,
+        STRATEGY_GRP,
+        MRP_TYPE,
+        UNIT_COST,
+        VENDOR_ITEM
+      FROM INV_SAP_PP_OPT_X
+      )REQ_PLANT
+    LEFT JOIN
+      (SELECT MATERIAL,
+        NVL(SUM(AVG26_USAGE_QTY),0) AS TOT_AP_AVG26_USAGE_QTY
+      FROM INV_SAP_PP_OPT_X
+      WHERE PLANT IN ('5040', '5100', '5200','5070','5140')
+      GROUP BY MATERIAL
+      )AP_USAGE
+    ON AP_USAGE.MATERIAL = REQ_PLANT.MATERIAL
+    )REQ_AP_USG
+  LEFT JOIN
+    (SELECT ID,SG_CHECK FROM INV_SAP_SR_SGCHECK
+    )AP_SG
+  ON AP_SG.ID = REQ_AP_USG.REQ_ID
+  )REQ_AP_SGU
+LEFT JOIN
+  (SELECT ID, AVG26_USAGE_QTY, STRATEGY_GRP FROM INV_SAP_PP_OPT_X WHERE PLANT IN ('1090','1180')
+  )VENDOR
+ON VENDOR.ID = REQ_AP_SGU.REQ_VENDOR_ITEM;
+------------------------------------------------------------------------------------------------------------------------
+
+--CREATE VIEW FOR RISK BUY
+DROP VIEW VIEW_INV_SAP_RISK_BUY;
+CREATE VIEW VIEW_INV_SAP_RISK_BUY AS
+SELECT REQ_AP_SGU.REQ_ID                                                 AS REQ_ID,
+  REQ_AP_SGU.REQ_PLANT                                                   AS REQ_PLANT,
+  REQ_AP_SGU.REQ_MATERIAL                                                AS REQ_MATERIAL,
+  REQ_AP_SGU.REQ_AVG26_USAGE_QTY                                         AS REQ_AVG26_USAGE_QTY,
+  REQ_AP_SGU.REQ_D_CHAIN_BLK                                             AS REQ_D_CHAIN_BLK,
+  REQ_AP_SGU.REQ_STRATEGY_GRP                                            AS REQ_STRATEGY_GRP,
+  REQ_AP_SGU.MRP_TYPE                                                    AS MRP_TYPE,
+  REQ_AP_SGU.REQ_VENDOR_ITEM                                             AS REQ_VENDOR_ITEM,
+  REQ_AP_SGU.APT_AVG26_USAGE_QTY                                         AS APT_AVG26_USAGE_QTY,
+  REQ_AP_SGU.REQ_UNIT_COST                                               AS REQ_UNIT_COST,
+  REQ_AP_SGU.AP_SG_CHECK                                                 AS AP_SG_CHECK,
+  VENDOR.AVG26_USAGE_QTY                                                 AS VEN_AVG26_USG_QTY,
+  VENDOR.STRATEGY_GRP                                                    AS VEN_STRATEGY_GRP
+FROM
+  (SELECT REQ_AP_USG.REQ_ID        AS REQ_ID,
+    REQ_AP_USG.REQ_PLANT           AS REQ_PLANT,
+    REQ_AP_USG.REQ_MATERIAL        AS REQ_MATERIAL,
+    REQ_AP_USG.REQ_AVG26_USAGE_QTY AS REQ_AVG26_USAGE_QTY,
+    REQ_AP_USG.REQ_D_CHAIN_BLK     AS REQ_D_CHAIN_BLK,
+    REQ_AP_USG.REQ_STRATEGY_GRP    AS REQ_STRATEGY_GRP,
+    REQ_AP_USG.MRP_TYPE            AS MRP_TYPE,
+    REQ_AP_USG.REQ_UNIT_COST       AS REQ_UNIT_COST,
+    REQ_AP_USG.REQ_VENDOR_ITEM     AS REQ_VENDOR_ITEM,
+    REQ_AP_USG.APT_AVG26_USAGE_QTY AS APT_AVG26_USAGE_QTY,
+    AP_SG.SG_CHECK                 AS AP_SG_CHECK
+  FROM
+    (SELECT REQ_PLANT.ID              AS REQ_ID,
+      REQ_PLANT.PLANT                 AS REQ_PLANT,
+      REQ_PLANT.MATERIAL              AS REQ_MATERIAL,
+      REQ_PLANT.AVG26_USAGE_QTY       AS REQ_AVG26_USAGE_QTY,
+      REQ_PLANT.D_CHAIN_BLK           AS REQ_D_CHAIN_BLK,
+      REQ_PLANT.STRATEGY_GRP          AS REQ_STRATEGY_GRP,
+      REQ_PLANT.MRP_TYPE              AS MRP_TYPE,
+      REQ_PLANT.UNIT_COST             AS REQ_UNIT_COST,
+      REQ_PLANT.VENDOR_ITEM           AS REQ_VENDOR_ITEM,
+      AP_USAGE.TOT_AP_AVG26_USAGE_QTY AS APT_AVG26_USAGE_QTY
+    FROM
+      (SELECT ID,
+        PLANT,
+        MATERIAL,
+        AVG26_USAGE_QTY,
+        D_CHAIN_BLK,
+        STRATEGY_GRP,
+        MRP_TYPE,
+        UNIT_COST,
+        VENDOR_ITEM
+      FROM INV_SAP_PP_OPT_X
+      )REQ_PLANT
+    LEFT JOIN
+      (SELECT MATERIAL,
+        NVL(SUM(AVG26_USAGE_QTY),0) AS TOT_AP_AVG26_USAGE_QTY
+      FROM INV_SAP_PP_OPT_X
+      WHERE PLANT IN ('5040', '5100', '5200','5070','5140')
+      GROUP BY MATERIAL
+      )AP_USAGE
+    ON AP_USAGE.MATERIAL = REQ_PLANT.MATERIAL
+    )REQ_AP_USG
+  LEFT JOIN
+    (SELECT ID,SG_CHECK FROM INV_SAP_SR_SGCHECK
+    )AP_SG
+  ON AP_SG.ID = REQ_AP_USG.REQ_ID
+  )REQ_AP_SGU
+LEFT JOIN
+  (SELECT ID, AVG26_USAGE_QTY, STRATEGY_GRP FROM INV_SAP_PP_OPT_X WHERE PLANT IN ('1090','1180')
+  )VENDOR
+ON VENDOR.ID = REQ_AP_SGU.REQ_VENDOR_ITEM;
+
+
+
+
+---Excel
+SELECT SRB.ID,
+  SRB.PLANT,
+  SRB.RB_MATL,
+  SRB.RB_QTY,
+  V_SRB.REQ_UNIT_COST,
+  CEIL(NVL(SRB.RB_QTY,0)*NVL(V_SRB.REQ_UNIT_COST,0)) AS REQ_VAL,
+  V_SRB.MRP_TYPE,
+  V_SRB.REQ_D_CHAIN_BLK,
+  V_SRB.REQ_STRATEGY_GRP,
+  V_SRB.USAGE_3MM,
+  V_SRB.AP_SG_CHECK,
+  V_SRB.AP_USAGE_2MM,
+  V_SRB.VEN_STRATEGY_GRP,
+  V_SRB.VEN_USAGE_1MM
+FROM
+  (SELECT REPLACE(RB_MATL, '-')
+    ||'_'
+    ||PLANT AS ID,
+    PLANT,
+    RB_MATL,
+    RB_QTY
+  FROM INV_SAP_RISK_BUY
+  WHERE PLANT NOT IN ('#')
+  )SRB
+LEFT JOIN
+  (SELECT REPLACE(REQ_MATERIAL, '-')
+    ||'_'
+    ||REQ_PLANT AS ID,
+    REQ_PLANT,
+    REQ_MATERIAL,
+    (REQ_AVG26_USAGE_QTY*12) AS USAGE_3MM,
+    MRP_TYPE,
+    REQ_D_CHAIN_BLK,
+    REQ_STRATEGY_GRP,
+    REQ_VENDOR_ITEM,
+    (APT_AVG26_USAGE_QTY*8) AS AP_USAGE_2MM,
+    AP_SG_CHECK,
+    REQ_UNIT_COST,
+    (VEN_AVG26_USG_QTY*4) AS VEN_USAGE_1MM,
+    VEN_STRATEGY_GRP
+  FROM VIEW_INV_SAP_RISK_BUY
+  )V_SRB
+ON SRB.ID = V_SRB.ID;

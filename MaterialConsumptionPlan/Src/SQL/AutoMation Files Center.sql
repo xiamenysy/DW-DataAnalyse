@@ -19,7 +19,7 @@
 		User_Name:	INVANALYST		Port:	1522
 		PWD:	Materials1		SID:	QDWS
 
-		
+		SELECT * FROM INV_SAP_PP_OPTIMIZATION;
 	1.3 Ini Setup
 		DROP TABLE INV_SAP_PP_OPTIMIZATION;
 		CREATE TABLE INV_SAP_PP_OPTIMIZATION AS
@@ -610,7 +610,7 @@
       
       
 ------pending
-  	2.18 Job Name: Job_Daily_AP_DELIERC_Y
+  	2.18 Job Name: Job_Daily_AP_DELIERC_6MM
 		Job Time: 21:00 PM
 		Job Repeat Frequency: Daily
 		Job Procedure:
@@ -622,18 +622,29 @@
 			INSERT_TABLE_DELI := 'INSERT INTO INV_SAP_LIKP_LIPS_DAILY_YEAR
         SELECT *
         FROM DWQ$LIBRARIAN.INV_SAP_LIKP_LIPS_DAILY@ROCKWELL_DW_DBLINK
-        WHERE CREATED_ON_DATE > SYSDATE - 365
+        WHERE CREATED_ON_DATE > SYSDATE - 195
         AND PLANTID                              IN ('||5040||', '||5050||', '||5100||', '||5110||', '||5120||', '||5160||', '||5190||', '||5200||','||5070||','||5140||')';
       EXECUTE IMMEDIATE TRUNCATE_TABLE_DELI;
     	EXECUTE IMMEDIATE INSERT_TABLE_DELI;
 		END;   		
 		
 		Job Initialization: 
-    CREATE TABLE INV_SAP_LIKP_LIPS_DAILY_YEAR AS
-    SELECT * FROM INV_SAP_LIKP_LIPS_DAILY;
+    CREATE TABLE INV_SAP_LIKP_LIPS_DAILY_6MM AS
+    SELECT * FROM INV_SAP_LIKP_LIPS_DAILY WHERE DELIVERY = '8014343294';
     TRUNCATE TABLE INV_SAP_LIKP_LIPS_DAILY_YEAR;
     INSERT INTO INV_SAP_LIKP_LIPS_DAILY_YEAR
     
+    TRUNCATE TABLE INV_SAP_LIKP_LIPS_DAILY_6MM;
+    
+    INSERT INTO INV_SAP_LIKP_LIPS_DAILY_6MM
+    SELECT *
+    FROM DWQ$LIBRARIAN.INV_SAP_LIKP_LIPS_DAILY@ROCKWELL_DW_DBLINK
+    WHERE CREATED_ON_DATE > SYSDATE - 195
+     AND PLANTID                              IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140','1090','1180','4000')
+
+     SELECT * FROM INV_SAP_LIKP_LIPS_DAILY_6MM;
+     
+     
  SELECT * FROM   
 (    SELECT *
     FROM DWQ$LIBRARIAN.INV_SAP_LIKP_LIPS_DAILY@ROCKWELL_DW_DBLINK
@@ -708,7 +719,7 @@ ON SO_HSI.SALESDOC = DELI.REFERENCE_DOC_TRIM
 		DROP TABLE INV_SAP_SALES_HST;
 		CREATE TABLE INV_SAP_SALES_HST AS
 		SELECT * FROM DWQ$LIBRARIAN.INV_SAP_SALES_HST@ROCKWELL_DW_DBLINK WHERE PLANTID IN ('5040', '5050', '5100', '5110', '5120', '5160', '5190', '5200','5070','5140');
-
+select PLANTID, SALESDOC, SALESDOCITEM, MATERIALID, PRIORITY_ORDER from INV_SAP_SALES_HST where PLANTID = '5040' AND PRIORITY_ORDER IN ('05','02')
 
   3.2 Job Name: Job_Weekly_BK_STI -- Just back the Stock item metric weekly bu and item data
 		Job Time: 8:00 AM
@@ -800,6 +811,66 @@ ON SO_HSI.SALESDOC = DELI.REFERENCE_DOC_TRIM
     ON PP.ID = INV.ID';
     EXECUTE IMMEDIATE INSERT_TABLE_INV_REC;
     END;
+    
+    
+    DECLARE
+  INSERT_TABLE_INV_REC  VARCHAR2(5000);
+BEGIN
+  INSERT_TABLE_INV_REC := 'INSERT INTO INV_SAP_INV_REC
+    SELECT
+    DISTINCT
+    INV.INV_ID                                                                           AS INV_ID,
+    INV.ID                                                                               AS ID,
+    INV.REC_DATE                                                                         AS REC_DATE,
+    INV.PLANTID                                                                          AS PLANTID,
+    INV.MATERIALID                                                                       AS MATERIAL,
+    PP.CATALOG_DASH                                                                      AS CATALOG_DASH,
+    PP.SAFETY_STOCK                                                                      AS SAFETY_STOCK,
+    PP.UNIT_COST                                                                         AS UNIT_COST,
+    PP.STRATEGY_GRP                                                                      AS STRATEGY_GRP,
+    PP.PROD_BU                                                                           AS PROD_BU,
+    PP.PROD_FAM                                                                          AS PROD_FAM,
+    PP.MATL_TYPE                                                                         AS MATL_TYPE,
+    NVL(INV.OH_QTY,0)                                                                    AS OH_QTY,
+    NVL(PP.MIN_INV,0)                                                                    AS MIN_INV,
+    NVL(PP.TARGET_INV,0)                                                                 AS TARGET_INV,
+    NVL(PP.MAX_INV,0)                                                                    AS MAX_INV,
+    (NVL(INV.OH_QTY,0)    *NVL(PP.UNIT_COST,0))                                          AS OH_VAL,
+    (NVL(PP.MIN_INV,0)    *NVL(PP.UNIT_COST,0))                                          AS MIN_INV_VAL,
+    (NVL(PP.TARGET_INV,0) *NVL(PP.UNIT_COST,0))                                          AS TARGET_INV_VAL,
+    (NVL(PP.MAX_INV,0)    *NVL(PP.UNIT_COST,0))                                          AS MAX_INV_VAL,
+    (NVL(INV.OH_QTY,0)    *NVL(PP.UNIT_COST,0) - NVL(PP.MAX_INV,0) *NVL(PP.UNIT_COST,0)) AS OVER_MAX_VAL
+  FROM
+    (SELECT 
+      SYSDATE||''_''||MATERIALID||''_''||PLANTID AS INV_ID,
+      MATERIALID||''_''||PLANTID AS ID,
+      SYSDATE AS REC_DATE,
+      MATERIALID,
+      PLANTID,
+      OH_QTY
+    FROM VIEW_INV_SAP_INV_BY_PLANT WHERE PLANTID IN ('||5040||', '||5050||', '||5100||', '||5110||', '||5120||', '||5160||', '||5190||', '||5200||','||5070||','||5140||','||5180||','||5150||','||5130||')
+    )INV
+  LEFT JOIN
+    (SELECT ID,
+      MATERIAL,
+      CATALOG_DASH,
+      PLANT,
+      SAFETY_STOCK,
+      UNIT,
+      UNIT_COST,
+      STRATEGY_GRP,
+      PROD_BU,
+      PROD_FAM,
+      MATL_TYPE,
+      MIN_INV,
+      TARGET_INV,
+      MAX_INV,
+      LEAD_TIME
+    FROM INV_SAP_PP_OPT_X
+    )PP
+  ON PP.ID = INV.ID';
+  EXECUTE IMMEDIATE INSERT_TABLE_INV_REC;
+END;
     		
 		Job Initialization:    
     DROP TABLE INV_SAP_INV_REC;
@@ -907,7 +978,23 @@ ON SO_HSI.SALESDOC = DELI.REFERENCE_DOC_TRIM
       DROP TABLE INV_SAP_ITEM_SOG_X;
       CREATE TABLE INV_SAP_ITEM_SOG_X AS SELECT * FROM VIEW_INV_SAP_ITEM_SOG_X;
   
-  
+  3.5 Job Name: Job_Weekly_INV_PRO_PARAM
+      Job Time: 11:00 AM SAT 
+      Job Repeat Frequency: Weekly
+      Job Procedure:
+      DECLARE
+        TRUNCATE_TABLE_INV_PROP   VARCHAR2(1000);
+        INSERT_TABLE_INV_PROP VARCHAR2(1000);
+      BEGIN
+        TRUNCATE_TABLE_INV_PROP   := 'TRUNCATE TABLE INV_SAP_PRODUCTION_PARAMETERS';
+        INSERT_TABLE_INV_PROP := 'INSERT INTO INV_SAP_PRODUCTION_PARAMETERS SELECT * FROM DWQ$LIBRARIAN.INV_SAP_PRODUCTION_PARAMETERS@ROCKWELL_DW_DBLINK';
+        EXECUTE IMMEDIATE TRUNCATE_TABLE_INV_PROP;
+        EXECUTE IMMEDIATE INSERT_TABLE_INV_PROP;
+      END;
+      
+      Job Initialization: 
+      DROP TABLE INV_SAP_PRODUCTION_PARAMETERS;
+      CREATE TABLE INV_SAP_PRODUCTION_PARAMETERS AS SELECT * FROM DWQ$LIBRARIAN.INV_SAP_PRODUCTION_PARAMETERS@ROCKWELL_DW_DBLINK;  
   
 
 --Monthly Jobs
@@ -1004,8 +1091,7 @@ ON SO_HSI.SALESDOC = DELI.REFERENCE_DOC_TRIM
 		  END LOOP;
 		  COMMIT;
 		END;
-    
- 
+     
     
     DECLARE
       CREATE_INV_SAP_MATL_CATA        VARCHAR2(1000);

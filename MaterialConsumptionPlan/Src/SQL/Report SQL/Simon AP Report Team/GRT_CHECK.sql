@@ -20,6 +20,7 @@ Plant	GRT
 SELECT PLANT,
   MATERIAL,
   GRT,
+  MATL_TYPE,
   CASE
     WHEN GRT < 7
     THEN 'Need To Check'
@@ -32,6 +33,7 @@ WHERE PLANT IN ('5040');
 SELECT PLANT,
   MATERIAL,
   GRT,
+  MATL_TYPE,
   CASE
     WHEN GRT < 6
     THEN 'Need To Check'
@@ -44,6 +46,7 @@ WHERE PLANT IN ('5070');
 SELECT PLANT,
   MATERIAL,
   GRT,
+  MATL_TYPE,
   CASE
     WHEN GRT < 2
     THEN 'Need To Check'
@@ -56,6 +59,7 @@ WHERE PLANT IN ('5110','5050');
 SELECT PLANT,
   MATERIAL,
   GRT,
+  MATL_TYPE,
   CASE
     WHEN GRT < 5
     THEN 'Need To Check'
